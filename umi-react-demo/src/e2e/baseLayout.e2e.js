@@ -7,7 +7,6 @@ function formatter(routes, parentPath = '') {
   const fixedParentPath = parentPath.replace(/\/{1,}/g, '/');
   let result = [];
   routes.forEach((item) => {
-    console.log(item, 'item======', fixedParentPath, 'fixedParentPath====');
     if (item.path) {
       result.push(`${fixedParentPath}/${item.path}`.replace(/\/{1,}/g, '/'));
     }

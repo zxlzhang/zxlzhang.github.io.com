@@ -27,7 +27,6 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
   } = props;
   const { formatMessage } = useIntl();
   const { breadcrumb } = getMenuData(routes);
-  console.log(breadcrumb, 'breadcrumb===');
   const title = getPageTitle({
     pathname: location.pathname,
     formatMessage,

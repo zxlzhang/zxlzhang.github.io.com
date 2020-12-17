@@ -125,8 +125,6 @@ const BasicLayout: React.FC<BasicLayoutProps> = (props) => {
     [location.pathname],
   );
 
-  console.log(authorized, 'authorized=====');
-
   const { formatMessage } = useIntl();
 
   return (
