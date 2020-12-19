@@ -3,17 +3,17 @@
     path: '/',
     component: '../layouts/BlankLayout',
     routes: [
-      {
-        path: '/user',
-        component: '../layouts/UserLayout',
-        routes: [
-          {
-            name: 'login',
-            path: '/user/login',
-            component: './user/login',
-          },
-        ],
-      },
+      // {
+      //   path: '/user',
+      //   component: '../layouts/UserLayout',
+      //   routes: [
+      //     {
+      //       name: 'login',
+      //       path: '/user/login',
+      //       component: './user/login',
+      //     },
+      //   ],
+      // },
       {
         path: '/',
         component: '../layouts/SecurityLayout',
@@ -42,7 +42,47 @@
                 name: 'content',
                 icon: 'DesktopOutlined',
                 component: './Content',
+                // exact: true,
+                // routes: [
+
+                // ],
                 // redirect:'/home'
+              },
+              {
+                path: '/content/university',
+                name: 'content-university',
+                component: './Content/University',
+                hideInMenu: true,
+              },
+              {
+                path: '/content/university/publish',
+                name: 'content-university-publish',
+                component: './Content/University/Publish',
+                hideInMenu: true,
+              },
+              {
+                path: '/content/service',
+                name: 'content-service',
+                component: './Content/Service',
+                hideInMenu: true,
+              },
+              {
+                path: '/content/service/publish',
+                name: 'content-service-publish',
+                component: './Content/Service/Publish',
+                hideInMenu: true,
+              },
+              {
+                path: '/content/news',
+                name: 'content-news',
+                component: './Content/News',
+                hideInMenu: true,
+              },
+              {
+                path: '/content/news/publish',
+                name: 'content-news-publish',
+                component: './Content/News/Publish',
+                hideInMenu: true,
               },
               {
                 name: 'img-store',

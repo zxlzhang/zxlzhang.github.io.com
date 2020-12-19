@@ -33,6 +33,8 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
     breadcrumb,
     ...props,
   });
+
+  console.log(logo, 'logo=====');
   return (
     <HelmetProvider>
       <Helmet>

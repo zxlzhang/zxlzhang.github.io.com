@@ -1,6 +1,12 @@
 export default {
   'menu.welcome': '欢迎',
   'menu.content': '内容管理',
+  'menu.content-university': '院校',
+  'menu.content-service': '服务',
+  'menu.content-news': '新闻',
+  'menu.content-university-publish': '发布',
+  'menu.content-service-publish': '发布',
+  'menu.content-news-publish': '发布',
   'menu.img-store': '图片库',
   'menu.keyword-category': '关键词分类',
   'menu.recommend': '推荐推送',
