@@ -116,7 +116,6 @@ class Analysis extends Component<AnalysisProps, AnalysisState> {
     const { registerUser, accessUser } = this.state;
     // const { dashboardAndanalysis, loading } = this.props;
 
-    console.log(this.state, ' this.state======', this.props, 'this.props=====s');
     // const {
     //   // visitData,
     //   visitData2,

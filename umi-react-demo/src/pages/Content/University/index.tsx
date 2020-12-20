@@ -1,141 +1,194 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import React, { Component, Suspense } from 'react';
-import { Typography } from 'antd';
+import React, { Component, Suspense, useRef, useCallback, useState } from 'react';
+import { Typography, Button, Tag, Space, Table, Row, Col, Select } from 'antd';
 import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
+import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
+import debounce from 'lodash.debounce';
+import request from 'umi-request';
 
 import moment from 'moment';
-// import styles from './Welcome.less';
-// import styles from './Content.less';
-
-interface AnalysisProps {
-  dashboardAndanalysis: any;
-  dispatch: Dispatch<any>;
-  loading: boolean;
+import styles from './index.less';
+interface GithubIssueItem {
+  url: string;
+  id: number;
+  number: number;
+  title: string;
+  labels: {
+    name: string;
+    color: string;
+  }[];
+  state: string;
+  comments: number;
+  created_at: string;
+  updated_at: string;
+  closed_at?: string;
 }
 
-interface AnalysisState {
-  salesType: 'all' | 'online' | 'stores';
-  currentTabKey: string;
-  //   rangePickerValue: RangePickerValue;
-  registerUser: number;
-  accessUser: number;
-}
+const University = () => {
+  const [universityList, setUniversity] = useState([]);
+  const [pageSize, setPagesize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [selectedKeys, setRowKeys] = useState([]);
+  const columns: ProColumns<GithubIssueItem>[] = [
+    {
+      dataIndex: 'title',
+      // // valueType: 'select',
+      //   hideInTable: true,,
+      title: '院校',
+      // valueEnum: {},
+      renderFormItem: (item, { defaultRender }) => {
+        return (
+          <Select
+            showSearch
+            placeholder={'请输入院校'}
+            // style={this.props.style}
+            defaultActiveFirstOption={false}
+            showArrow={false}
+            filterOption={false}
+            onSearch={handleChangeTitle}
+            // onChange={handleChangeTitle}
+            notFoundContent={null}
+          >
+            {universityList}
+          </Select>
+        );
+      },
+    },
+    {
+      dataIndex: 'publishman',
+      valueType: 'select',
+      title: '发布者',
+    },
+    {
+      dataIndex: 'date',
+      title: '日期',
+      valueType: 'date',
+    },
+    {
+      dataIndex: 'status',
+      valueType: 'select',
+      title: '发布状态',
+      valueEnum: {
+        all: { text: '全部' },
+        yes: { text: '已上线' },
+        no: { text: '未上线' },
+        unknow: { text: '未知' },
+      },
+      renderFormItem: (_, { defaultRender }) => {
+        return defaultRender(_);
+      },
+      render: (_, record) => (
+        <Space>
+          {record.labels.map(({ name, color }) => (
+            <Tag color={color} key={name}>
+              {name}
+            </Tag>
+          ))}
+        </Space>
+      ),
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      render: (text, record, _, action) => [
+        <a
+          key="editable"
+          onClick={() => {
+            return onEditor(record);
+          }}
+        >
+          编辑
+        </a>,
+      ],
+    },
+  ];
 
-class Analysis extends Component<AnalysisProps, AnalysisState> {
-  state: AnalysisState = {
-    salesType: 'all',
-    currentTabKey: '',
-    // rangePickerValue: getTimeDistance('year'),
-    registerUser: 0,
-    accessUser: 0,
+  const handleChangeTitle = useCallback(
+    debounce((e: any) => {
+      console.log(e, 'e====变化院校==');
+    }, 800),
+    [],
+  );
+  const onEditor = (record: any) => {
+    console.log('编辑', record);
   };
 
-  reqRef: number = 0;
+  const goOnLine = () => {
+    console.log('点击批量上线', selectedKeys);
+  };
 
-  timeoutId: number = 0;
+  const onSubmit = (e: any) => {
+    console.log(e, '提交表单');
+  };
 
-  componentDidMount() {}
+  const onSelectedRowKeys = (rowKeys: any, rows: any) => {
+    setRowKeys(rowKeys);
+    console.log(rowKeys, '选择多选框', rows);
+  };
 
-  componentWillUnmount() {}
+  const onChangePage = (current: any, pageSize: any) => {
+    console.log(current, '变化页面', pageSize);
+  };
 
-  render() {
-    const { registerUser, accessUser } = this.state;
+  const onShowSizeChange = (current: any, pageSize: any) => {
+    console.log(current, '变化条数', pageSize);
+  };
+  // render() {
+  // const { registerUser, accessUser } = this.state;
+  const actionRef = useRef<ActionType>();
 
-    console.log(this.state, ' this.state======', this.props, 'this.props=====s');
-    const { Paragraph } = Typography;
-    return (
-      <PageContainer>
-        <Paragraph>院校</Paragraph>
-        <Link to="/content/university/publish">发布</Link>
-      </PageContainer>
-      // <GridContent>
-      //   <React.Fragment>
-      //     <Suspense fallback={<PageLoading />}>
-      //       <IntroduceRow loading={loading} visitData={visitData} />
-      //     </Suspense>
-      //     <Suspense fallback={null}>
-      //       <SalesCard
-      //         rangePickerValue={rangePickerValue}
-      //         salesData={salesData}
-      //         isActive={this.isActive}
-      //         handleRangePickerChange={this.handleRangePickerChange}
-      //         loading={loading}
-      //         selectDate={this.selectDate}
-      //       />
-      //     </Suspense>
-      //     <Row
-      //       gutter={24}
-      //       style={{
-      //         marginTop: 24,
-      //       }}
-      //     >
-      //       <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-      //         <Suspense fallback={null}>
-      //           <TopSearch
-      //             loading={loading}
-      //             visitData2={visitData2}
-      //             searchData={searchData}
-      //             dropdownGroup={dropdownGroup}
-      //           />
-      //         </Suspense>
-      //       </Col>
-      //       <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-      //         <Suspense fallback={null}>
-      //           <ProportionSales
-      //             dropdownGroup={dropdownGroup}
-      //             salesType={salesType}
-      //             loading={loading}
-      //             salesPieData={salesPieData}
-      //             handleChangeSalesType={this.handleChangeSalesType}
-      //           />
-      //         </Suspense>
-      //       </Col>
-      //     </Row>
-      //     <Suspense fallback={null}>
-      //       <OfflineData
-      //         activeKey={activeKey}
-      //         loading={loading}
-      //         offlineData={offlineData}
-      //         offlineChartData={offlineChartData}
-      //         handleTabChange={this.handleTabChange}
-      //       />
-      //     </Suspense>
-      //   </React.Fragment>
-      // </GridContent>
-    );
-  }
-}
+  const { Paragraph } = Typography;
+  return (
+    <PageContainer>
+      <Row>
+        <Col className={styles.urUniversity}>
+          <Button type="primary" onClick={goOnLine}>
+            批量上线
+          </Button>
+          <Button type="primary">批量下线</Button>
+          <Button type="primary">批量删除</Button>
+          <Button type="primary">发布院校</Button>
+        </Col>
+      </Row>
+      <ProTable<GithubIssueItem>
+        columns={columns}
+        rowSelection={{
+          // 自定义选择项参考: https://ant.design/components/table-cn/#components-table-demo-row-selection-custom
+          // 注释该行则默认不显示下拉选项
+          selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
+          onChange: (selectedRowKeys, selectedRows) => {
+            onSelectedRowKeys(selectedRowKeys, selectedRows);
+          },
+        }}
+        actionRef={actionRef}
+        onSubmit={onSubmit}
+        request={async (params = {}) =>
+          request<{
+            data: GithubIssueItem[];
+          }>('https://proapi.azurewebsites.net/github/issues', {
+            params,
+          })
+        }
+        editable={{
+          type: 'multiple',
+        }}
+        rowKey="id"
+        search={{
+          labelWidth: 'auto',
+          defaultCollapsed: false,
+        }}
+        pagination={{
+          pageSize: pageSize,
+          total: total,
+          onChange: onChangePage,
+          onShowSizeChange: onShowSizeChange,
+        }}
+        dateFormatter="string"
+      />
+      <Link to="/content/university/publish">发布</Link>
+    </PageContainer>
+  );
+  // }
+};
 
-export default Analysis;
-// export default connect(
-//   ({
-//     dashboardAndanalysis,
-//     loading,
-//   }: {
-//     dashboardAndanalysis: any;
-//     loading: {
-//       effects: { [key: string]: boolean };
-//     };
-//   }) => ({
-//     dashboardAndanalysis,
-//     loading: loading.effects['dashboardAndanalysis/fetch'],
-//   }),
-// )(Analysis);
-
-// export default (): React.ReactNode => {
-//   const intl = useIntl();
-//   return (
-//     <PageContainer>
-//       <Row gutter={{ md: 24 }}>
-//         <Col span={6} className={styles.urContentStatistic}>
-//           <Statistic value={112893} />
-//           <p>今日新增注册用户</p>
-//         </Col>
-//         <Col span={6} className={styles.urContentStatistic}>
-//           <Statistic value={112893} precision={2} />
-//           <p>今日访问用户量</p>
-//         </Col>
-//       </Row>
-//     </PageContainer>
-//   );
-// };
+export default University;

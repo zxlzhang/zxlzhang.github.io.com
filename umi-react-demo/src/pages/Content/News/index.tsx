@@ -41,7 +41,6 @@ class Analysis extends Component<AnalysisProps, AnalysisState> {
   render() {
     const { registerUser, accessUser } = this.state;
 
-    console.log(this.state, ' this.state======', this.props, 'this.props=====s');
     const { Paragraph } = Typography;
     return (
       <PageContainer>

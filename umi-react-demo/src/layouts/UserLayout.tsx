@@ -34,7 +34,6 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
     ...props,
   });
 
-  console.log(logo, 'logo=====');
   return (
     <HelmetProvider>
       <Helmet>
