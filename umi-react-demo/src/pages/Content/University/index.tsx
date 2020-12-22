@@ -117,6 +117,14 @@ const University = () => {
     console.log('点击批量上线', selectedKeys);
   };
 
+  const goOutLine = () => {
+    console.log('批量下线');
+  };
+
+  const onMutipleDel = () => {
+    console.log('批量删除');
+  };
+
   const onSubmit = (e: any) => {
     console.log(e, '提交表单');
   };
@@ -145,9 +153,15 @@ const University = () => {
           <Button type="primary" onClick={goOnLine}>
             批量上线
           </Button>
-          <Button type="primary">批量下线</Button>
-          <Button type="primary">批量删除</Button>
-          <Button type="primary">发布院校</Button>
+          <Button type="primary" onClick={goOutLine}>
+            批量下线
+          </Button>
+          <Button type="primary" onClick={onMutipleDel}>
+            批量删除
+          </Button>
+          <Button type="primary">
+            <Link to="/content/university/publish"> 发布院校</Link>
+          </Button>
         </Col>
       </Row>
       <ProTable<GithubIssueItem>
@@ -185,7 +199,6 @@ const University = () => {
         }}
         dateFormatter="string"
       />
-      <Link to="/content/university/publish">发布</Link>
     </PageContainer>
   );
   // }
