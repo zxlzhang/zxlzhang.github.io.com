@@ -1,7 +1,22 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Card, Alert, Typography, Image } from 'antd';
+import {
+  Card,
+  Alert,
+  Typography,
+  Image,
+  Row,
+  Col,
+  Form,
+  Button,
+  DatePicker,
+  List,
+  Avatar,
+  Radio,
+} from 'antd';
 import { useIntl, FormattedMessage } from 'umi';
+import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
+
 // import styles from './Welcome.less';
 // import styles from './Content.less';
 
@@ -13,56 +28,63 @@ import { useIntl, FormattedMessage } from 'umi';
 //   </pre>
 // );
 
-export default (): React.ReactNode => {
+const ImgStore = () => {
+  const { RangePicker } = DatePicker;
   const intl = useIntl();
   return (
     <PageContainer>
       <Card>
-        <Image
-          width={200}
-          src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+        <Row>
+          <Col span={2}>
+            <AppstoreOutlined />
+            <BarsOutlined />
+          </Col>
+          <Col span={22}>
+            <Form>
+              <Row>
+                <Col span={8}>
+                  <Form.Item>
+                    <RangePicker />
+                  </Form.Item>
+                </Col>
+                <Col span={4}>
+                  <Form.Item wrapperCol={{ span: 12, offset: 6 }}>
+                    <Button type="primary" htmlType="submit">
+                      搜索
+                    </Button>
+                  </Form.Item>
+                </Col>
+              </Row>
+            </Form>
+          </Col>
+        </Row>
+      </Card>
+      <Col style={{ margin: '16px 0' }}>
+        <Button style={{ 'margin-right': '16px' }} type="primary">
+          上传图片
+        </Button>
+        <Button type="primary">批量删除</Button>
+      </Col>
+      <Card>
+        <List
+          itemLayout="horizontal"
+          dataSource={[{}]}
+          renderItem={(item) => (
+            <List.Item extra={<Radio></Radio>}>
+              <List.Item.Meta
+                avatar={
+                  <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                }
+                title={'title'}
+                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+              />
+            </List.Item>
+          )}
         />
-        {/* <Alert
-          message={intl.formatMessage({
-            id: 'pages.welcome.alertMessage',
-            defaultMessage: '更快更强的重型组件，已经发布。',
-          })}
-          type="success"
-          showIcon
-          banner
-          style={{
-            margin: -12,
-            marginBottom: 24,
-          }}
-        /> */}
-        {/* <Typography.Text strong>
-          <FormattedMessage id="pages.welcome.advancedComponent" defaultMessage="高级表格" />{' '}
-          <a
-            href="https://procomponents.ant.design/components/table"
-            rel="noopener noreferrer"
-            target="__blank"
-          >
-            <FormattedMessage id="pages.welcome.link" defaultMessage="欢迎使用" />
-          </a>
-        </Typography.Text> */}
-        {/* <CodePreview>yarn add @ant-design/pro-table</CodePreview> */}
-        {/* <Typography.Text
-          strong
-          style={{
-            marginBottom: 12,
-          }}
-        >
-          <FormattedMessage id="pages.welcome.advancedLayout" defaultMessage="高级布局" />{' '}
-          <a
-            href="https://procomponents.ant.design/components/layout"
-            rel="noopener noreferrer"
-            target="__blank"
-          >
-            <FormattedMessage id="pages.welcome.link" defaultMessage="欢迎使用" />
-          </a>
-        </Typography.Text> */}
-        {/* <CodePreview>yarn add @ant-design/pro-layout</CodePreview> */}
+        ,
       </Card>
     </PageContainer>
   );
 };
+
+export default ImgStore;

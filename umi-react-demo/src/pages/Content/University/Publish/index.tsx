@@ -1,5 +1,6 @@
 import React, { Component, Suspense, useRef, useCallback, useState } from 'react';
 import { message, Form, Switch, Select, Row, Col, Button } from 'antd';
+import UrEditor from '../../components/UrEditor';
 import ProForm, {
   ProFormSwitch,
   ProFormText,
@@ -38,6 +39,10 @@ const PublistUniversity = () => {
     }, 800),
     [],
   );
+
+  const handleEditorChange = (e: any) => {
+    console.log(e, '编辑富文本====');
+  };
 
   return (
     <div className={styles.urUniversityForm}>
@@ -125,6 +130,9 @@ const PublistUniversity = () => {
             }),
           ]}
         />
+        <Form.Item name="content" label="发布内容" required={true}>
+          <UrEditor handleEditorChange={handleEditorChange}></UrEditor>
+        </Form.Item>
       </ProForm>
     </div>
   );
