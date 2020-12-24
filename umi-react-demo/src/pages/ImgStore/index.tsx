@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import {
   Card,
@@ -29,15 +29,32 @@ import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
 // );
 
 const ImgStore = () => {
+  const [listFlag, setListFlag] = useState(false);
+  // interface stateObj={
+  //   setListFlag:Function
+  // }
   const { RangePicker } = DatePicker;
   const intl = useIntl();
+  // setListFlag = () => {
+  //   this.setState({
+  //     listFlag:!listFlag
+  //   })
+
+  // }
   return (
     <PageContainer>
       <Card>
         <Row>
           <Col span={2}>
-            <AppstoreOutlined />
-            <BarsOutlined />
+            {listFlag ? (
+              <span onClick={() => setListFlag(false)}>
+                <AppstoreOutlined style={{ fontSize: '30px' }} />
+              </span>
+            ) : (
+              <span onClick={() => setListFlag(true)}>
+                <BarsOutlined style={{ fontSize: '30px' }} />
+              </span>
+            )}
           </Col>
           <Col span={22}>
             <Form>
@@ -60,28 +77,74 @@ const ImgStore = () => {
         </Row>
       </Card>
       <Col style={{ margin: '16px 0' }}>
-        <Button style={{ 'margin-right': '16px' }} type="primary">
+        <Button style={{ marginRight: '16px' }} type="primary">
           上传图片
         </Button>
         <Button type="primary">批量删除</Button>
       </Col>
       <Card>
-        <List
-          itemLayout="horizontal"
-          dataSource={[{}]}
-          renderItem={(item) => (
-            <List.Item extra={<Radio></Radio>}>
-              <List.Item.Meta
-                avatar={
-                  <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-                }
-                title={'title'}
-                description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+        {!listFlag ? (
+          <List
+            itemLayout="horizontal"
+            dataSource={[{}]}
+            renderItem={(item) => (
+              <List.Item extra={<Radio></Radio>}>
+                <List.Item.Meta
+                  avatar={
+                    <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
+                  }
+                  title={'title'}
+                  description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                />
+              </List.Item>
+            )}
+          />
+        ) : (
+          <Row gutter={[16, 24]}>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
               />
-            </List.Item>
-          )}
-        />
-        ,
+            </Col>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              />
+            </Col>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              />
+            </Col>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              />
+            </Col>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              />
+            </Col>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              />
+            </Col>
+            <Col className="gutter-row" span={4}>
+              <Image
+                width={200}
+                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
+              />
+            </Col>
+          </Row>
+        )}
       </Card>
     </PageContainer>
   );
