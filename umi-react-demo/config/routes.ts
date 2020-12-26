@@ -100,13 +100,15 @@
                 name: 'recommend',
                 icon: 'AlertOutlined',
                 path: '/recommend',
-                component: './Recommend',
+                component: './404',
+                // component: './Recommend',
               },
               {
                 name: 'user-management',
                 icon: 'TeamOutlined',
                 path: '/user-management',
-                component: './UserManagement',
+                component: './404',
+                // component: './UserManagement',
               },
               {
                 path: '/admin',

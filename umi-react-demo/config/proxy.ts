@@ -22,9 +22,9 @@ export default {
   },
   pre: {
     '/api/': {
-      target: 'your pre url',
+      target: 'https://jiawo-jiaji.doc.coding.io',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
+      pathRewrite: { '^': '/api' },
     },
   },
 };

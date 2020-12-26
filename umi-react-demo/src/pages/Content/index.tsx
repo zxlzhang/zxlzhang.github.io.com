@@ -5,7 +5,7 @@ import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Li
 import { RadioChangeEvent } from 'antd/es/radio';
 import { RangePickerProps } from 'antd/es/date-picker/generatePicker';
 import { getTimeDistance } from '../utils/utils';
-import { GridContent } from '@ant-design/pro-layout';
+import { Admin, Public } from '../service';
 import moment from 'moment';
 // import styles from './Welcome.less';
 import styles from './index.less';
@@ -254,21 +254,3 @@ export default Analysis;
 //     loading: loading.effects['dashboardAndanalysis/fetch'],
 //   }),
 // )(Analysis);
-
-// export default (): React.ReactNode => {
-//   const intl = useIntl();
-//   return (
-//     <PageContainer>
-//       <Row gutter={{ md: 24 }}>
-//         <Col span={6} className={styles.urContentStatistic}>
-//           <Statistic value={112893} />
-//           <p>今日新增注册用户</p>
-//         </Col>
-//         <Col span={6} className={styles.urContentStatistic}>
-//           <Statistic value={112893} precision={2} />
-//           <p>今日访问用户量</p>
-//         </Col>
-//       </Row>
-//     </PageContainer>
-//   );
-// };

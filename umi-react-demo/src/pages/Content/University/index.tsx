@@ -5,6 +5,7 @@ import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Li
 import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
 import debounce from 'lodash.debounce';
 import request from 'umi-request';
+import { Admin, Public } from '../serviceApi';
 
 import moment from 'moment';
 import styles from './index.less';
