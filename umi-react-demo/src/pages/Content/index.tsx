@@ -5,7 +5,6 @@ import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Li
 import { RadioChangeEvent } from 'antd/es/radio';
 import { RangePickerProps } from 'antd/es/date-picker/generatePicker';
 import { getTimeDistance } from '../utils/utils';
-import { Admin, Public } from '../service';
 import moment from 'moment';
 // import styles from './Welcome.less';
 import styles from './index.less';

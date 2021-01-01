@@ -8,10 +8,15 @@
 export default {
   dev: {
     '/api/': {
-      target: 'https://preview.pro.ant.design',
+      target: 'https://wfplwim6-jiaji.mock.coding.io',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
+    // '/api/': {
+    //   target: 'https://preview.pro.ant.design',
+    //   changeOrigin: true,
+    //   pathRewrite: { '^': '' },
+    // },
   },
   test: {
     '/api/': {
@@ -22,7 +27,7 @@ export default {
   },
   pre: {
     '/api/': {
-      target: 'https://jiawo-jiaji.doc.coding.io',
+      target: 'https://wfplwim6-jiaji.mock.coding.io',
       changeOrigin: true,
       pathRewrite: { '^': '/api' },
     },

@@ -48,8 +48,11 @@ const errorHandler = (error: { response: Response }): Response => {
 /**
  * 配置request请求时的默认参数
  */
+
+// console.log(extend, 'extend======');
 const request = extend({
-  errorHandler, // 默认错误处理
+  prefix: '/api',
+  errorHandler, // 默认错误处理D
   credentials: 'include', // 默认请求是否带上cookie
 });
 

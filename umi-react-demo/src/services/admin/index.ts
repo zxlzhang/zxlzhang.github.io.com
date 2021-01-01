@@ -80,12 +80,22 @@ async function updateSchool(id: number | string, params: any) {
   });
 }
 
-async function publishSchool(id: number | string, params: any) {
-  return request(`/admin/school/publish/${id}`, {
+async function publishSchool(params: { isPublished: string; ids: string }) {
+  return request(`/admin/school/publish`, {
     method: 'POST',
     data: {
       ...params,
-      method: 'post',
+      // method: 'post',
+    },
+  });
+}
+
+async function removeSchool(params: { ids: string }) {
+  return request(`/admin/school/delete`, {
+    method: 'POST',
+    data: {
+      ...params,
+      // method: 'post',
     },
   });
 }
@@ -150,6 +160,12 @@ async function updateRule(params: any) {
   });
 }
 
+async function querySchools(params: any) {
+  return request(`/school/query`, {
+    params,
+  });
+}
+
 export default {
   addAticle,
   updateAticle,
@@ -164,4 +180,6 @@ export default {
   addProfession,
   updateSchoolProfessions,
   setSiteConfig,
+  querySchools,
+  removeSchool,
 };

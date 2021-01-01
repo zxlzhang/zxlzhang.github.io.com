@@ -25,6 +25,7 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
       pathname: '',
     },
   } = props;
+
   const { formatMessage } = useIntl();
   const { breadcrumb } = getMenuData(routes);
   const title = getPageTitle({
@@ -46,7 +47,7 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
           <SelectLang />
         </div>
         <div className={styles.content}>
-          <div className={styles.top}>
+          {/* <div className={styles.top}>
             <div className={styles.header}>
               <Link to="/">
                 <img alt="logo" className={styles.logo} src={logo} />
@@ -59,7 +60,7 @@ const UserLayout: React.FC<UserLayoutProps> = (props) => {
                 defaultMessage="Ant Design 是西湖区最具影响力的 Web 设计规范"
               />
             </div>
-          </div>
+          </div> */}
           {children}
         </div>
         <DefaultFooter />
