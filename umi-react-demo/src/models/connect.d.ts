@@ -3,6 +3,8 @@ import { GlobalModelState } from './global';
 import { UserModelState } from './user';
 import { StateType } from './login';
 import { UniversityStateType } from './university';
+import { ServicesBusinessStateType } from './serviceBusiness';
+import { NewsStateType } from './serviceBusiness';
 
 export { GlobalModelState, UserModelState };
 
@@ -16,6 +18,8 @@ export interface Loading {
     user?: boolean;
     login?: boolean;
     university?: boolean;
+    services?: boolean;
+    news?: boolean;
   };
 }
 
@@ -26,6 +30,8 @@ export interface ConnectState {
   user: UserModelState;
   login: StateType;
   university: UniversityStateType;
+  services: ServicesBusinessStateType;
+  news: NewsStateType;
 }
 
 export interface Route extends MenuDataItem {

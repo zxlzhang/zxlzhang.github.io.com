@@ -40,8 +40,8 @@ const UrEditor = (UrEditorProps: any) => {
     //   { title: 'Some class', value: 'class-name' },
     // ],
     importcss_append: true,
-    images_upload_url: '/demo/upimg.php',
-    images_upload_base_path: '/demo',
+    images_upload_url: '/api/admin/media/upload',
+    images_upload_base_path: '/api',
     // 自定义文件选择器的回调内容
     file_picker_callback: function (callback: any, value: any, meta: any) {
       if (meta.filetype === 'file') {

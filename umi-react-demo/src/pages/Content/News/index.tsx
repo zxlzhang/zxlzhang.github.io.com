@@ -1,140 +1,341 @@
 import { PageContainer } from '@ant-design/pro-layout';
-import React, { Component, Suspense } from 'react';
-import { Typography } from 'antd';
+import React, {
+  Component,
+  Suspense,
+  useRef,
+  useCallback,
+  useState,
+  useEffect,
+  useMemo,
+} from 'react';
+import { Button, Space, Table, Row, Col, Select, Checkbox, Modal } from 'antd';
 import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
+import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import debounce from 'lodash.debounce';
+import { StateType } from '@/models/news';
+import { ConnectState } from '@/models/connect';
+import { Public, Admin } from '@/services';
 
 import moment from 'moment';
-// import styles from './Welcome.less';
-// import styles from './Content.less';
-
-interface AnalysisProps {
-  dashboardAndanalysis: any;
-  dispatch: Dispatch<any>;
-  loading: boolean;
+import styles from './index.less';
+interface GithubIssueItem {
+  url: string;
+  id: number;
+  number: number;
+  title: string;
+  labels: {
+    name: string;
+    color: string;
+  }[];
+  state: string;
+  comments: number;
+  created_at: string;
+  updated_at: string;
+  closed_at?: string;
+  name: string;
+  summary: string;
+  brochure: string;
+  badge: string;
+  avatar: string;
+  banner: string;
+  hero: string;
+  tags: string;
+  eduRanges: string;
+  professions: string;
+  // hotNews: null;
+  isPublished: boolean;
+  createdAt: string;
+  updatedAt: string;
+  dataSource: Array<[]>;
 }
 
-interface AnalysisState {
-  salesType: 'all' | 'online' | 'stores';
-  currentTabKey: string;
-  //   rangePickerValue: RangePickerValue;
-  registerUser: number;
-  accessUser: number;
+interface NewsModelProps {
+  dispatch: Dispatch;
+  newsProps: StateType;
+  // submitting?: boolean;
 }
 
-class Analysis extends Component<AnalysisProps, AnalysisState> {
-  state: AnalysisState = {
-    salesType: 'all',
-    currentTabKey: '',
-    // rangePickerValue: getTimeDistance('year'),
-    registerUser: 0,
-    accessUser: 0,
+const News: React.FC<NewsModelProps> = (props) => {
+  // const [universityList, setUniversity] = useState([]);
+  const { newsProps = {} } = props;
+  const { params } = newsProps;
+
+  const [limit, setPagesize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [dataSource, setDataSource] = useState<Array<{}>>([]);
+  const [selectedKeys, setRowKeys] = useState([]);
+
+  const { confirm } = Modal;
+
+  const columns: ProColumns<GithubIssueItem>[] = [
+    {
+      dataIndex: 'title',
+      // // valueType: 'select',
+      //   hideInTable: true,,
+      initialValue: (params && params.title) || undefined,
+      title: '新闻资讯',
+      // valueEnum: {},
+      renderFormItem: (item, { defaultRender }) => {
+        return (
+          <Select
+            showSearch
+            placeholder={'请输入新闻资讯'}
+            // style={this.props.style}
+            defaultActiveFirstOption={false}
+            showArrow={false}
+            filterOption={false}
+            onSearch={handleChangeTitle}
+            // onChange={handleChangeTitle}
+            notFoundContent={null}
+          >
+            {/* {item} */}
+          </Select>
+        );
+      },
+    },
+    {
+      dataIndex: 'publishman',
+      valueType: 'select',
+      initialValue: (params && params.publishman) || undefined,
+      title: '发布者',
+    },
+    {
+      dataIndex: 'date',
+      title: '日期',
+      initialValue: (params && params.date) || undefined,
+      valueType: 'date',
+      render: (_, record) => (
+        <Space>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</Space>
+      ),
+    },
+    {
+      dataIndex: 'status',
+      valueType: 'select',
+      title: '发布状态',
+      initialValue: (params && params.status) || undefined,
+      valueEnum: {
+        all: { text: '全部' },
+        yes: { text: '已上线' },
+        no: { text: '未上线' },
+        unknow: { text: '未知' },
+      },
+      renderFormItem: (_, { defaultRender }) => {
+        return defaultRender(_);
+      },
+      render: (_, record) => (
+        <Space>
+          <Checkbox onChange={(e) => onChangePublish(record, e)} checked={record.isPublished}>
+            已上线
+          </Checkbox>
+        </Space>
+      ),
+    },
+    {
+      title: '操作',
+      valueType: 'option',
+      render: (text, record, _, action) => [
+        <a
+          key="editable"
+          onClick={() => {
+            return onEditor(record);
+          }}
+        >
+          编辑
+        </a>,
+      ],
+    },
+  ];
+
+  useEffect(() => {
+    find();
+  }, [limit, offset, params]);
+  //获取列表
+  const find = () => {
+    const obj = {
+      limit,
+      offset,
+      name: (params && params.title) || undefined,
+      status: (params && params.status) || undefined,
+      date: (params && params.date) || undefined,
+      publishman: (params && params.publishman) || undefined,
+    };
+    setLoading(true);
+    Admin.queryAd(obj)
+      .then((res) => {
+        setLoading(false);
+        if (!res.error) {
+          setDataSource([...res.data.rows]);
+          setTotal(res.data.count);
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   };
 
-  reqRef: number = 0;
+  //单个上下线
+  const onChangePublish = (item: any, e: any) => {
+    confirm({
+      title: `确定${e.target.checked ? '发布' : '取消发布'}该新闻资讯吗？`,
+      icon: <ExclamationCircleOutlined />,
+      onOk() {
+        console.log('OK');
+        isPublishAd(e.target.checked, [item.id]);
+      },
+      onCancel() {},
+    });
+  };
 
-  timeoutId: number = 0;
+  const isPublishAd = (isPublished: boolean, ids: Array<''>) => {
+    Admin.publishAd({ isPublished: !isPublished ? '0' : '1', ids: ids.join(',') }).then((res) => {
+      if (!res.error) {
+        setRowKeys([]);
+        find();
+      }
+    });
+  };
 
-  componentDidMount() {}
+  const handleChangeTitle = useCallback(
+    debounce((e: any) => {
+      console.log(e, 'e====变化院校==');
+    }, 800),
+    [],
+  );
+  const onEditor = (record: any) => {
+    console.log('编辑', record);
+  };
+  //批量上线
+  const goOnLine = () => {
+    confirm({
+      title: `确定发布该新闻资讯吗？`,
+      icon: <ExclamationCircleOutlined />,
+      onOk() {
+        console.log('OK');
+        isPublishAd(true, selectedKeys);
+      },
+      onCancel() {},
+    });
+  };
+  //批量下线
+  const goOutLine = () => {
+    confirm({
+      title: `确定取消发布该新闻资讯吗？`,
+      icon: <ExclamationCircleOutlined />,
+      onOk() {
+        console.log('OK');
+        isPublishAd(false, selectedKeys);
+      },
+      onCancel() {},
+    });
+  };
+  //批量删除
+  const onMutipleDel = () => {
+    confirm({
+      title: `确定删除该新闻资讯吗？`,
+      icon: <ExclamationCircleOutlined />,
+      onOk() {
+        Admin.removeAd({ ids: selectedKeys.join(',') }).then((res) => {
+          if (!res.error) {
+            setRowKeys([]);
+            find();
+          }
+        });
+      },
+      onCancel() {},
+    });
+  };
+  //提交搜索
+  const onSubmit = (e: any) => {
+    console.log(e, '提交表单');
+    const { dispatch } = props;
+    dispatch({
+      type: 'news/setParams',
+      payload: { params: { ...e } },
+    });
+  };
+  //多选
+  const onSelectedRowKeys = (rowKeys: any, rows: any) => {
+    setRowKeys(rowKeys);
+  };
+  //变化页面
+  const onChangePage = (current: any, pageSize: any) => {
+    console.log(current, '变化页面', pageSize);
+  };
+  //变化条数
+  const onShowSizeChange = (current: any, pageSize: any) => {
+    setPagesize(pageSize);
+    setOffset((current - 1) * 0);
+  };
 
-  componentWillUnmount() {}
+  const actionRef = useRef<ActionType>();
+  return (
+    <PageContainer>
+      <Row>
+        <Col className={styles.urNews}>
+          <Button type="primary" onClick={goOnLine} disabled={selectedKeys.length == 0}>
+            批量上线
+          </Button>
+          <Button type="primary" onClick={goOutLine} disabled={selectedKeys.length == 0}>
+            批量下线
+          </Button>
+          <Button type="primary" onClick={onMutipleDel} disabled={selectedKeys.length == 0}>
+            批量删除
+          </Button>
+          <Button type="primary">
+            <Link to="/content/university/publish"> 发布文章</Link>
+          </Button>
+        </Col>
+      </Row>
+      <ProTable<GithubIssueItem>
+        className={styles.urProTable}
+        columns={columns}
+        loading={loading}
+        rowSelection={{
+          // 自定义选择项参考: https://ant.design/components/table-cn/#components-table-demo-row-selection-custom
+          // 注释该行则默认不显示下拉选项
+          selections: [Table.SELECTION_ALL, Table.SELECTION_INVERT],
+          selectedRowKeys: selectedKeys,
+          onChange: (selectedRowKeys, selectedRows) => {
+            onSelectedRowKeys(selectedRowKeys, selectedRows);
+          },
+        }}
+        actionRef={actionRef}
+        onSubmit={onSubmit}
+        dataSource={dataSource}
+        // request={
+        //   dataSource:dataSource,
+        //   total:total
+        //   // async (params = {}) =>
+        //   // request<{
+        //   //   data: GithubIssueItem[];
+        //   // }>('https://proapi.azurewebsites.net/github/issues', {
+        //   //   params,
+        //   // })
+        // }
+        editable={{
+          type: 'multiple',
+        }}
+        rowKey="id"
+        search={{
+          labelWidth: 'auto',
+          defaultCollapsed: false,
+        }}
+        pagination={{
+          pageSize: limit,
+          total: total,
+          onChange: onChangePage,
+          onShowSizeChange: onShowSizeChange,
+        }}
+        dateFormatter="string"
+      />
+    </PageContainer>
+  );
+  // }
+};
 
-  render() {
-    const { registerUser, accessUser } = this.state;
-
-    const { Paragraph } = Typography;
-    return (
-      <PageContainer>
-        <Paragraph>新闻</Paragraph>
-        <Link to="/content/news/publish">发布</Link>
-      </PageContainer>
-      // <GridContent>
-      //   <React.Fragment>
-      //     <Suspense fallback={<PageLoading />}>
-      //       <IntroduceRow loading={loading} visitData={visitData} />
-      //     </Suspense>
-      //     <Suspense fallback={null}>
-      //       <SalesCard
-      //         rangePickerValue={rangePickerValue}
-      //         salesData={salesData}
-      //         isActive={this.isActive}
-      //         handleRangePickerChange={this.handleRangePickerChange}
-      //         loading={loading}
-      //         selectDate={this.selectDate}
-      //       />
-      //     </Suspense>
-      //     <Row
-      //       gutter={24}
-      //       style={{
-      //         marginTop: 24,
-      //       }}
-      //     >
-      //       <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-      //         <Suspense fallback={null}>
-      //           <TopSearch
-      //             loading={loading}
-      //             visitData2={visitData2}
-      //             searchData={searchData}
-      //             dropdownGroup={dropdownGroup}
-      //           />
-      //         </Suspense>
-      //       </Col>
-      //       <Col xl={12} lg={24} md={24} sm={24} xs={24}>
-      //         <Suspense fallback={null}>
-      //           <ProportionSales
-      //             dropdownGroup={dropdownGroup}
-      //             salesType={salesType}
-      //             loading={loading}
-      //             salesPieData={salesPieData}
-      //             handleChangeSalesType={this.handleChangeSalesType}
-      //           />
-      //         </Suspense>
-      //       </Col>
-      //     </Row>
-      //     <Suspense fallback={null}>
-      //       <OfflineData
-      //         activeKey={activeKey}
-      //         loading={loading}
-      //         offlineData={offlineData}
-      //         offlineChartData={offlineChartData}
-      //         handleTabChange={this.handleTabChange}
-      //       />
-      //     </Suspense>
-      //   </React.Fragment>
-      // </GridContent>
-    );
-  }
-}
-
-export default Analysis;
-// export default connect(
-//   ({
-//     dashboardAndanalysis,
-//     loading,
-//   }: {
-//     dashboardAndanalysis: any;
-//     loading: {
-//       effects: { [key: string]: boolean };
-//     };
-//   }) => ({
-//     dashboardAndanalysis,
-//     loading: loading.effects['dashboardAndanalysis/fetch'],
-//   }),
-// )(Analysis);
-
-// export default (): React.ReactNode => {
-//   const intl = useIntl();
-//   return (
-//     <PageContainer>
-//       <Row gutter={{ md: 24 }}>
-//         <Col span={6} className={styles.urContentStatistic}>
-//           <Statistic value={112893} />
-//           <p>今日新增注册用户</p>
-//         </Col>
-//         <Col span={6} className={styles.urContentStatistic}>
-//           <Statistic value={112893} precision={2} />
-//           <p>今日访问用户量</p>
-//         </Col>
-//       </Row>
-//     </PageContainer>
-//   );
-// };
+export default connect(({ news, loading }: ConnectState) => ({
+  newsProps: news,
+}))(News);

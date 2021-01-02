@@ -20,12 +20,11 @@ async function updateAticle(id: number | string, params: any) {
   });
 }
 
-async function publishAticle(id: number | string, params: any) {
-  return request(`/admin/article/publish/${id}`, {
+async function publishAticle(params: any) {
+  return request(`/admin/article/publish`, {
     method: 'POST',
     data: {
       ...params,
-      method: 'post',
     },
   });
 }
@@ -166,6 +165,46 @@ async function querySchools(params: any) {
   });
 }
 
+async function queryArticles(params: any) {
+  return request(`/admin/article/query`, {
+    params,
+  });
+}
+
+async function removeArticles(params: { ids: string }) {
+  return request('/admin/article/delete', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  });
+}
+
+async function queryAd(params: any) {
+  return request(`/admin/ad/query`, {
+    params,
+  });
+}
+
+async function publishAd(params: { isPublished: string; ids: string }) {
+  return request(`/admin/ad/publish`, {
+    method: 'POST',
+    data: {
+      ...params,
+      // method: 'post',
+    },
+  });
+}
+
+async function removeAd(params: { ids: string }) {
+  return request('/admin/ad/delete', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  });
+}
+
 export default {
   addAticle,
   updateAticle,
@@ -182,4 +221,9 @@ export default {
   setSiteConfig,
   querySchools,
   removeSchool,
+  queryArticles,
+  removeArticles,
+  queryAd,
+  publishAd,
+  removeAd,
 };

@@ -63,6 +63,7 @@ const University: React.FC<universityProps> = (props) => {
   const [limit, setPagesize] = useState(10);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<Array<{}>>([]);
   const [selectedKeys, setRowKeys] = useState([]);
 
@@ -105,6 +106,9 @@ const University: React.FC<universityProps> = (props) => {
       title: '日期',
       initialValue: (params && params.date) || undefined,
       valueType: 'date',
+      render: (_, record) => (
+        <Space>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</Space>
+      ),
     },
     {
       dataIndex: 'status',
@@ -157,12 +161,18 @@ const University: React.FC<universityProps> = (props) => {
       date: (params && params.date) || undefined,
       publishman: (params && params.publishman) || undefined,
     };
-    Admin.querySchools(obj).then((res) => {
-      if (!res.error) {
-        setDataSource([...res.data.rows]);
-        setTotal(res.data.count);
-      }
-    });
+    setLoading(true);
+    Admin.querySchools(obj)
+      .then((res) => {
+        setLoading(false);
+        if (!res.error) {
+          setDataSource([...res.data.rows]);
+          setTotal(res.data.count);
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   };
 
   //单个上下线
@@ -283,6 +293,7 @@ const University: React.FC<universityProps> = (props) => {
       <ProTable<GithubIssueItem>
         className={styles.urProTable}
         columns={columns}
+        loading={loading}
         rowSelection={{
           // 自定义选择项参考: https://ant.design/components/table-cn/#components-table-demo-row-selection-custom
           // 注释该行则默认不显示下拉选项

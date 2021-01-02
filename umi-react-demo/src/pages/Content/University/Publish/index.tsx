@@ -20,6 +20,7 @@ import ProForm, {
 } from '@ant-design/pro-form';
 import debounce from 'lodash.debounce';
 import styles from './index.less';
+import { Public, Admin } from '@/services';
 
 const waitTime = (time: number = 100) => {
   return new Promise((resolve) => {
@@ -33,17 +34,36 @@ const layout = {
   wrapperCol: { span: 18 },
 };
 const PublistUniversity = () => {
+  const [schoolOptions, setSchools] = useState([]);
+
   const onSearchName = useCallback(
     debounce((e: any) => {
-      console.log(e, '搜索学校');
+      initShools(e);
     }, 800),
     [],
   );
 
+  const initShools = (e: any) => {
+    const obj = {
+      name: e || undefined,
+    };
+    Admin.querySchools(obj)
+      .then((res) => {
+        if (!res.error) {
+          setSchools(
+            res.data.rows.map((el: any) => {
+              return { ...el, label: el.name, value: el.id };
+            }),
+          );
+        }
+      })
+      .catch(() => {});
+  };
+
   const handleEditorChange = (e: any) => {
     console.log(e, '编辑富文本====');
   };
-
+  const { Option } = Select;
   return (
     <div className={styles.urUniversityForm}>
       <ProForm
@@ -54,20 +74,23 @@ const PublistUniversity = () => {
         onFinish={async (value) => console.log(value)}
       >
         <ProFormSelect
-          {...layout}
+          // {...layout}
           showSearch
           name="select"
           label="院校"
           fieldProps={{
             onSearch: onSearchName,
+            options: schoolOptions,
           }}
-          valueEnum={{
-            china: 'China',
-            usa: 'U.S.A',
-          }}
+          // valueEnum={{
+          //   china: 'China',
+          //   usa: 'U.S.A',
+          // }}
           placeholder="请输入院校"
           rules={[{ required: true, message: '请输入院校' }]}
-        />
+        >
+          <Option value="1">Not Identified</Option>
+        </ProFormSelect>
         <ProFormCheckbox.Group
           name="checkbox-group"
           label="院校类型"
@@ -90,21 +113,44 @@ const PublistUniversity = () => {
           extra="PC端院校详情页Banner图，推荐规格1440*290"
           rules={[{ required: true, message: '请上传PC端Banner' }]}
         />
-        <ProFormRadio.Group
-          name="radio"
-          label="文章类型"
-          rules={[{ required: true, message: '请选择文章类型' }]}
+        <ProFormCheckbox.Group
+          name="checkbox-group"
+          label="学历范围"
+          rules={[{ required: true, message: '请选择学历范围' }]}
           options={[
             {
-              label: '学院简介',
+              label: '学信网',
               value: 'a',
             },
             {
-              label: '招生简章',
+              label: '在职研究生',
               value: 'b',
+            },
+            {
+              label: '定向招生',
+              value: 'c',
             },
           ]}
         />
+        {/* <ProFormRadio.Group
+          name="radio"
+          label="学历范围"
+          rules={[{ required: true, message: '请选择学历范围' }]}
+          options={[
+            {
+              label: '学信网',
+              value: 'a',
+            },
+            {
+              label: '在职研究生',
+              value: 'b',
+            },
+            {
+              label: '定向招生',
+              value: 'c',
+            },
+          ]}
+        /> */}
         <ProFormSelect
           name="keywords"
           label="添加关键词"
@@ -130,7 +176,10 @@ const PublistUniversity = () => {
             }),
           ]}
         />
-        <Form.Item name="content" label="发布内容" required={true}>
+        <Form.Item name="content" label="学院简介" required={true}>
+          <UrEditor handleEditorChange={handleEditorChange}></UrEditor>
+        </Form.Item>
+        <Form.Item name="content" label="招生简章" required={true}>
           <UrEditor handleEditorChange={handleEditorChange}></UrEditor>
         </Form.Item>
       </ProForm>
