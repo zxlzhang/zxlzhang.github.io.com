@@ -5,7 +5,7 @@ async function addAticle(params: any) {
     method: 'POST',
     data: {
       ...params,
-      method: 'post',
+      // method: 'post',
     },
   });
 }
@@ -52,10 +52,15 @@ async function addTag(name: number | string, params: any) {
 async function uploadMedia(params: any) {
   return request(`/admin/media/upload`, {
     method: 'POST',
-    data: {
-      ...params,
-      method: 'post',
+    responseType: 'blob',
+    headers: {
+      contentType: 'multipart/form-data',
     },
+    data: params,
+    //  {
+    //   ...params,
+    //   // method: 'post',
+    // },
   });
 }
 
@@ -205,6 +210,12 @@ async function removeAd(params: { ids: string }) {
   });
 }
 
+async function queryImgs(params: any) {
+  return request(`/admin/media/query`, {
+    params,
+  });
+}
+
 export default {
   addAticle,
   updateAticle,
@@ -226,4 +237,5 @@ export default {
   queryAd,
   publishAd,
   removeAd,
+  queryImgs,
 };

@@ -5,6 +5,8 @@ interface UrEditorProps {
   handleEditorChange: Function;
 }
 
+const actionImgUrl = 'https://wfplwim6-jiaji.mock.coding.io/api/admin/media/upload';
+
 const UrEditor = (UrEditorProps: any) => {
   const editorObj = {
     selector: '#tinydemo2',
@@ -40,7 +42,7 @@ const UrEditor = (UrEditorProps: any) => {
     //   { title: 'Some class', value: 'class-name' },
     // ],
     importcss_append: true,
-    images_upload_url: '/api/admin/media/upload',
+    images_upload_url: actionImgUrl,
     images_upload_base_path: '/api',
     // 自定义文件选择器的回调内容
     file_picker_callback: function (callback: any, value: any, meta: any) {

@@ -163,7 +163,7 @@ const News: React.FC<NewsModelProps> = (props) => {
       publishman: (params && params.publishman) || undefined,
     };
     setLoading(true);
-    Admin.queryAd(obj)
+    Admin.queryArticles(obj)
       .then((res) => {
         setLoading(false);
         if (!res.error) {
@@ -183,19 +183,21 @@ const News: React.FC<NewsModelProps> = (props) => {
       icon: <ExclamationCircleOutlined />,
       onOk() {
         console.log('OK');
-        isPublishAd(e.target.checked, [item.id]);
+        isPublishAticle(e.target.checked, [item.id]);
       },
       onCancel() {},
     });
   };
 
-  const isPublishAd = (isPublished: boolean, ids: Array<''>) => {
-    Admin.publishAd({ isPublished: !isPublished ? '0' : '1', ids: ids.join(',') }).then((res) => {
-      if (!res.error) {
-        setRowKeys([]);
-        find();
-      }
-    });
+  const isPublishAticle = (isPublished: boolean, ids: Array<''>) => {
+    Admin.publishAticle({ isPublished: !isPublished ? '0' : '1', ids: ids.join(',') }).then(
+      (res) => {
+        if (!res.error) {
+          setRowKeys([]);
+          find();
+        }
+      },
+    );
   };
 
   const handleChangeTitle = useCallback(
@@ -214,7 +216,7 @@ const News: React.FC<NewsModelProps> = (props) => {
       icon: <ExclamationCircleOutlined />,
       onOk() {
         console.log('OK');
-        isPublishAd(true, selectedKeys);
+        isPublishAticle(true, selectedKeys);
       },
       onCancel() {},
     });
@@ -226,7 +228,7 @@ const News: React.FC<NewsModelProps> = (props) => {
       icon: <ExclamationCircleOutlined />,
       onOk() {
         console.log('OK');
-        isPublishAd(false, selectedKeys);
+        isPublishAticle(false, selectedKeys);
       },
       onCancel() {},
     });
@@ -237,7 +239,7 @@ const News: React.FC<NewsModelProps> = (props) => {
       title: `确定删除该新闻资讯吗？`,
       icon: <ExclamationCircleOutlined />,
       onOk() {
-        Admin.removeAd({ ids: selectedKeys.join(',') }).then((res) => {
+        Admin.removeArticles({ ids: selectedKeys.join(',') }).then((res) => {
           if (!res.error) {
             setRowKeys([]);
             find();
@@ -285,7 +287,7 @@ const News: React.FC<NewsModelProps> = (props) => {
             批量删除
           </Button>
           <Button type="primary">
-            <Link to="/content/university/publish"> 发布文章</Link>
+            <Link to="/content/news/publish"> 发布文章</Link>
           </Button>
         </Col>
       </Row>
