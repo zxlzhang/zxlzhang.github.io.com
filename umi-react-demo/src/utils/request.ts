@@ -56,4 +56,18 @@ const request = extend({
   credentials: 'include', // 默认请求是否带上cookie
 });
 
+// request拦截器, 改变url 或 options.
+request.interceptors.request.use((url, options) => {
+  // console.log(url, 'url====', options, 'options======');
+  return {
+    url,
+    options: { ...options, interceptors: true },
+  };
+});
+
+// 局部拦截器使用
+request.interceptors.response.use((response, options) => {
+  return response;
+});
+
 export default request;

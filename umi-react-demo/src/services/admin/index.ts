@@ -52,9 +52,10 @@ async function addTag(name: number | string, params: any) {
 async function uploadMedia(params: any) {
   return request(`/admin/media/upload`, {
     method: 'POST',
-    responseType: 'blob',
+    // responseType: 'blob',
     headers: {
-      contentType: 'multipart/form-data',
+      'Content-Type': 'multipart/form-data',
+      Accept: 'multipart/form-data',
     },
     data: params,
     //  {
@@ -216,6 +217,21 @@ async function queryImgs(params: any) {
   });
 }
 
+async function removeImgs(params: any) {
+  return request('/admin/media/delete', {
+    method: 'POST',
+    data: {
+      ...params,
+    },
+  });
+}
+
+async function queryTags(params: any) {
+  return request(`/admin/tag/query`, {
+    params,
+  });
+}
+
 export default {
   addAticle,
   updateAticle,
@@ -238,4 +254,6 @@ export default {
   publishAd,
   removeAd,
   queryImgs,
+  removeImgs,
+  queryTags,
 };

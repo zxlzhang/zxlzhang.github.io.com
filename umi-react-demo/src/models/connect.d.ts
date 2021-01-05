@@ -6,6 +6,7 @@ import { UniversityStateType } from './university';
 import { ServicesBusinessStateType } from './serviceBusiness';
 import { NewsStateType } from './serviceBusiness';
 import { ImgStoreType } from './imgStore';
+import { KeyWordsType } from './keywords';
 
 export { GlobalModelState, UserModelState };
 
@@ -22,6 +23,7 @@ export interface Loading {
     services?: boolean;
     news?: boolean;
     imgStore?: boolean;
+    keyword?: boolean;
   };
 }
 
@@ -35,6 +37,7 @@ export interface ConnectState {
   services: ServicesBusinessStateType;
   news: NewsStateType;
   imgStore: ImgStoreType;
+  keyword: KeyWordsType;
 }
 
 export interface Route extends MenuDataItem {

@@ -10,10 +10,10 @@ export interface StateType {
   status?: 'ok' | 'error';
   type?: string;
   currentAuthority?: 'user' | 'guest' | 'admin';
-  params?: { name: string; status: string; date: string; publishman: string };
+  params?: { keyword: string; startNum: number; endNum: number; publishman: string };
 }
 
-export interface UniversityModelType {
+export interface KeywordModelType {
   namespace: string;
   state: StateType;
   effects: {
@@ -22,20 +22,21 @@ export interface UniversityModelType {
     setParams: Effect;
   };
   reducers: {
-    changeUniversityParams: Reducer<StateType>;
+    changeKeywordParams: Reducer<StateType>;
   };
 }
 
-const Model: UniversityModelType = {
-  namespace: 'university',
+const Model: KeywordModelType = {
+  namespace: 'keyword',
   state: {
     params: undefined,
   },
+
   effects: {
     *setParams({ payload }, { call, put }) {
-      console.log(payload, 'payload====');
+      console.log(payload, 'keyword====');
       yield put({
-        type: 'changeUniversityParams',
+        type: 'changeKeywordParams',
         payload: payload,
       });
     },
@@ -81,8 +82,8 @@ const Model: UniversityModelType = {
   },
 
   reducers: {
-    changeUniversityParams(state, { payload }) {
-      console.log(payload, 'payload===changeUniversityParams');
+    changeKeywordParams(state, { payload }) {
+      console.log(payload, 'keyword====changeKeywordParams');
       setAuthority(payload.currentAuthority);
       return {
         ...state,

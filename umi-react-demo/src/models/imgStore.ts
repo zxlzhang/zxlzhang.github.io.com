@@ -28,14 +28,13 @@ export interface ImgsModelType {
 
 const Model: ImgsModelType = {
   namespace: 'imgStore',
-
   state: {
     params: undefined,
   },
 
   effects: {
     *setParams({ payload }, { call, put }) {
-      console.log(payload, 'payload====');
+      console.log(payload, 'imgspayload====');
       yield put({
         type: 'changeImgsParams',
         payload: payload,
@@ -84,6 +83,7 @@ const Model: ImgsModelType = {
 
   reducers: {
     changeImgsParams(state, { payload }) {
+      console.log(payload, 'imgspayload====changeImgsParams');
       setAuthority(payload.currentAuthority);
       return {
         ...state,

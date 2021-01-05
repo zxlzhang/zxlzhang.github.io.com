@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Card, Image, Row, Col, Form, Button, DatePicker, List, Avatar, Radio } from 'antd';
+import {
+  Card,
+  Row,
+  Col,
+  Form,
+  Button,
+  DatePicker,
+  List,
+  Avatar,
+  Modal,
+  Upload,
+  Checkbox,
+  message,
+} from 'antd';
 import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
 import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
 import { Public, Admin } from '@/services';
 import { StateType } from '@/models/imgStore';
 import { ConnectState } from '@/models/connect';
+import config from '../../config';
+import axios from 'axios';
+import moment from 'moment';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 interface imgtoreProps {
   dispatch: Dispatch;
@@ -16,17 +33,17 @@ interface imgtoreProps {
 const ImgStore: React.FC<imgtoreProps> = (props) => {
   const { imgStoreStateProps = {} } = props;
   const { params } = imgStoreStateProps;
-  console.log(params, 'params====');
 
   const [listFlag, setListFlag] = useState(false);
   const [limit, setPagesize] = useState(10);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [dataSource, setDataSource] = useState<Array<{}>>([]);
-  const [selectedKeys, setRowKeys] = useState([]);
+  const [dataSource, setDataSource] = useState<Array<{ id: string; ext: string }>>([]);
+  const [selectedKeys, setRowKeys] = useState<Array<string>>([]);
   const { RangePicker } = DatePicker;
   const intl = useIntl();
+  const { confirm } = Modal;
   useEffect(() => {
     find();
   }, [limit, offset, params]);
@@ -35,10 +52,12 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
     const obj = {
       limit,
       offset,
-      name: (params && params.title) || undefined,
-      status: (params && params.status) || undefined,
-      date: (params && params.date) || undefined,
-      publishman: (params && params.publishman) || undefined,
+      startDate:
+        (params && params.date && moment(params.date[0]).format('YYYY-MM-DD HH:mm:ss')) ||
+        undefined,
+      endDate:
+        (params && params.date && moment(params.date[1]).format('YYYY-MM-DD HH:mm:ss')) ||
+        undefined,
     };
     setLoading(true);
     Admin.queryImgs(obj)
@@ -47,6 +66,7 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
         if (!res.error) {
           setDataSource([...res.data.rows]);
           setTotal(res.data.count);
+          setRowKeys([]);
         }
       })
       .catch(() => {
@@ -63,18 +83,86 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
     });
   };
 
+  const uploadProps = {
+    name: 'file',
+    multiple: true,
+    fileList: [],
+    customRequest(info: any) {
+      console.log(info.file, 'info====');
+      const file = info.file;
+      const formData = new FormData();
+      formData.append('name', info.name);
+      formData.append('file', info.file);
+      // Admin.uploadMedia(formData).then((res) => {
+      //   console.log(res, 'res====');
+      // });
+      var CancelToken = axios.CancelToken;
+      axios({
+        timeout: 1000 * 60,
+        url: config.actionImgUrl,
+        method: 'POST',
+        data: formData,
+        cancelToken: new CancelToken((c) => {
+          //行中断请求
+          file.cancel = c;
+        }),
+        onUploadProgress: (progressEvent) => {
+          // 对原生进度事件的处理
+          console.log(progressEvent, 'progressEvent======进度');
+        },
+      })
+        .then((response) => {
+          const { data } = response;
+          console.log(response, 'response====');
+          if (data.data) {
+            find();
+          }
+        })
+        .catch(() => {});
+    },
+  };
+
+  const onCheckRadio = (e: any, item: any) => {
+    const index = selectedKeys.findIndex((el) => {
+      return el == item.id;
+    });
+    if (index != -1) {
+      let list = [...selectedKeys];
+      list.splice(index, 1);
+      setRowKeys(list);
+    } else {
+      let list = [...selectedKeys];
+      list.push(item.id);
+      setRowKeys(list);
+    }
+  };
+  //批量删除
+  const onMultipleDel = () => {
+    confirm({
+      title: `确定删除该图片吗？`,
+      icon: <ExclamationCircleOutlined />,
+      onOk() {
+        Admin.removeImgs({ ids: selectedKeys.join(',') }).then((res) => {
+          if (!res.error) {
+            find();
+          }
+        });
+      },
+      onCancel() {},
+    });
+  };
   const [form] = Form.useForm();
   return (
     <PageContainer>
       <Card>
         <Row>
           <Col span={2}>
-            {listFlag ? (
-              <span onClick={() => setListFlag(false)}>
+            {!listFlag ? (
+              <span onClick={() => setListFlag(true)}>
                 <AppstoreOutlined style={{ fontSize: '30px' }} />
               </span>
             ) : (
-              <span onClick={() => setListFlag(true)}>
+              <span onClick={() => setListFlag(false)}>
                 <BarsOutlined style={{ fontSize: '30px' }} />
               </span>
             )}
@@ -99,73 +187,66 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
           </Col>
         </Row>
       </Card>
-      <Col style={{ margin: '16px 0' }}>
-        <Button style={{ marginRight: '16px' }} type="primary">
-          上传图片
-        </Button>
-        <Button type="primary">批量删除</Button>
-      </Col>
+      <Row style={{ margin: '16px 0' }}>
+        <Col span={2}>
+          <Upload {...uploadProps}>
+            <Button style={{ marginRight: '16px' }} type="primary">
+              上传图片
+            </Button>
+          </Upload>
+        </Col>
+
+        <Col span={2}>
+          <Button disabled={selectedKeys.length == 0} type="primary" onClick={onMultipleDel}>
+            批量删除
+          </Button>
+        </Col>
+      </Row>
       <Card>
         {!listFlag ? (
           <List
             itemLayout="horizontal"
-            dataSource={[{}]}
-            renderItem={(item) => (
-              <List.Item extra={<Radio></Radio>}>
+            dataSource={dataSource}
+            renderItem={(item: { id: string; ext: string }) => (
+              <List.Item
+                extra={
+                  <Checkbox
+                    checked={selectedKeys.findIndex((el) => el == item.id) != -1 ? true : false}
+                    onChange={(e) => {
+                      onCheckRadio(e, item);
+                    }}
+                  ></Checkbox>
+                }
+              >
                 <List.Item.Meta
-                  avatar={
-                    <Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-                  }
-                  title={'title'}
-                  description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                  avatar={<Avatar src={`${item.id}${item.ext}`} />}
+                  title={`${item.id}${item.ext}`}
+                  // description="Ant Design, a design language for background applications, is refined by Ant UED Team"
                 />
               </List.Item>
             )}
           />
         ) : (
           <Row gutter={[16, 24]}>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
-            <Col className="gutter-row" span={4}>
-              <Image
-                width={200}
-                src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-              />
-            </Col>
+            {dataSource.map((item) => (
+              <Col className="gutter-row" span={4}>
+                <div
+                  style={
+                    selectedKeys.findIndex((el) => el == item.id) != -1
+                      ? { border: '1px solid #059aff', padding: '3px' }
+                      : { border: '1px solid #d9d9d9', padding: '3px' }
+                  }
+                  onClick={(e) => {
+                    onCheckRadio(e, item);
+                  }}
+                >
+                  <img src={`${item.id}${item.ext}`} alt="avatar" style={{ width: '100%' }} />
+                  <Checkbox
+                    checked={selectedKeys.findIndex((el) => el == item.id) != -1 ? true : false}
+                  ></Checkbox>
+                </div>
+              </Col>
+            ))}
           </Row>
         )}
       </Card>
@@ -174,5 +255,5 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
 };
 
 export default connect(({ imgStore, loading }: ConnectState) => ({
-  universityProps: imgStore,
+  imgStoreStateProps: imgStore,
 }))(ImgStore);

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Card, Row, Col, Form, Button, Input, Table, Avatar, InputNumber } from 'antd';
-import { useIntl, FormattedMessage } from 'umi';
+import { useIntl, FormattedMessage, Dispatch, connect } from 'umi';
+import { Public, Admin } from '@/services';
 // import styles from './Welcome.less';
 // import styles from './Content.less';
 
@@ -13,9 +14,56 @@ import { useIntl, FormattedMessage } from 'umi';
 //   </pre>
 // );
 
-const KeyWordCategory = () => {
+import { StateType } from '@/models/keywords';
+import { ConnectState } from '@/models/connect';
+
+interface keyWordCategoryProps {
+  dispatch: Dispatch;
+  keywordsProps: StateType;
+  // submitting?: boolean;
+}
+
+const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
+  const { keywordsProps = {} } = props;
+  const { params } = keywordsProps;
   const [selectionType, setSelectionType] = useState('checkbox');
+  const [limit, setPagesize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [dataSource, setDataSource] = useState<Array<{}>>([]);
+  const [selectedKeys, setRowKeys] = useState([]);
   const intl = useIntl();
+
+  useEffect(() => {
+    find();
+  }, [limit, offset, params]);
+  //获取列表
+  const find = () => {
+    const obj = {
+      limit,
+      offset,
+      keyword: (params && params.keyword) || undefined,
+      startNum: (params && params.startNum) || undefined,
+      endNum: (params && params.endNum) || undefined,
+      // startTime: (params && params.date && params.date[0]) || undefined,
+      // endTime: (params && params.date && params.date[1]) || undefined,
+    };
+    setLoading(true);
+    Admin.queryTags(obj)
+      .then((res) => {
+        setLoading(false);
+        if (!res.error) {
+          setDataSource([...res.data.rows]);
+          setTotal(res.data.count);
+        }
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  };
+
+  console.log(params, 'params====');
   const columns = [
     {
       title: '标签',
@@ -54,6 +102,15 @@ const KeyWordCategory = () => {
     },
   ];
 
+  const onFinish = (values: any) => {
+    console.log(values, 'values=====');
+    const { dispatch } = props;
+    dispatch({
+      type: 'keyword/setParams',
+      payload: { params: values },
+    });
+  };
+
   // rowSelection object indicates the need for row selection
   const rowSelection = {
     onChange: (selectedRowKeys: any, selectedRows: any) => {
@@ -64,11 +121,12 @@ const KeyWordCategory = () => {
       name: record.name,
     }),
   };
+  const [form] = Form.useForm();
 
   return (
     <PageContainer>
       <Card>
-        <Form>
+        <Form form={form} onFinish={onFinish}>
           <Row>
             <Col span={8}>
               <Form.Item name="keyword" label="关键词">
@@ -143,4 +201,8 @@ const KeyWordCategory = () => {
     </PageContainer>
   );
 };
-export default KeyWordCategory;
+// export default KeyWordCategory;
+
+export default connect(({ keyword, loading }: ConnectState) => ({
+  keywordsProps: keyword,
+}))(KeyWordCategory);
