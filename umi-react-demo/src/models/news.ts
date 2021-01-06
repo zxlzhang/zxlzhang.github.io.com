@@ -11,6 +11,13 @@ export interface StateType {
   type?: string;
   currentAuthority?: 'user' | 'guest' | 'admin';
   params?: { title: string; status: string; date: string; publishman: string };
+  currentItem?: {
+    id: number;
+    title: string;
+    content: string;
+    tags: string;
+    eduRanges: string;
+  };
 }
 
 export interface NewsModelType {
@@ -20,6 +27,7 @@ export interface NewsModelType {
     // login: Effect;
     // logout: Effect;
     setParams: Effect;
+    setCurrentItem: Effect;
   };
   reducers: {
     changeNewsParams: Reducer<StateType>;
@@ -31,10 +39,18 @@ const Model: NewsModelType = {
 
   state: {
     params: undefined,
+    currentItem: undefined,
   },
 
   effects: {
     *setParams({ payload }, { call, put }) {
+      console.log(payload, 'payload====');
+      yield put({
+        type: 'changeNewsParams',
+        payload: payload,
+      });
+    },
+    *setCurrentItem({ payload }, { call, put }) {
       console.log(payload, 'payload====');
       yield put({
         type: 'changeNewsParams',
@@ -90,6 +106,7 @@ const Model: NewsModelType = {
         status: payload.status,
         type: payload.type,
         params: payload.params,
+        currentItem: payload.currentItem,
       };
     },
   },

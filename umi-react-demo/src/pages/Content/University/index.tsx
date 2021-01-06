@@ -10,12 +10,12 @@ import React, {
 } from 'react';
 import { Button, Space, Table, Row, Col, Select, Checkbox, Modal } from 'antd';
 import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
-import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
+import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import debounce from 'lodash.debounce';
 import { StateType } from '@/models/university';
 import { ConnectState } from '@/models/connect';
-import { Public, Admin } from '@/services';
+import { Admin } from '@/services';
 
 import moment from 'moment';
 import styles from './index.less';
@@ -58,7 +58,7 @@ interface universityProps {
 const University: React.FC<universityProps> = (props) => {
   // const [universityList, setUniversity] = useState([]);
   const { universityProps = {} } = props;
-  const { params } = universityProps;
+  const { params, currentItem } = universityProps;
 
   const [limit, setPagesize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -206,6 +206,12 @@ const University: React.FC<universityProps> = (props) => {
     [],
   );
   const onEditor = (record: any) => {
+    const { dispatch } = props;
+    dispatch({
+      type: 'university/setCurrentItem',
+      payload: { currentItem: { ...record } },
+    });
+    history.push('/content/university/publish');
     console.log('编辑', record);
   };
   //批量上线
@@ -271,6 +277,14 @@ const University: React.FC<universityProps> = (props) => {
     setOffset((current - 1) * 0);
   };
 
+  const onCreate = () => {
+    const { dispatch } = props;
+    dispatch({
+      type: 'university/setCurrentItem',
+      payload: { currentItem: undefined },
+    });
+  };
+
   const actionRef = useRef<ActionType>();
   return (
     <PageContainer>
@@ -285,7 +299,7 @@ const University: React.FC<universityProps> = (props) => {
           <Button type="primary" onClick={onMutipleDel} disabled={selectedKeys.length == 0}>
             批量删除
           </Button>
-          <Button type="primary">
+          <Button type="primary" onClick={onCreate}>
             <Link to="/content/university/publish"> 发布院校</Link>
           </Button>
         </Col>

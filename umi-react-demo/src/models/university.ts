@@ -11,6 +11,18 @@ export interface StateType {
   type?: string;
   currentAuthority?: 'user' | 'guest' | 'admin';
   params?: { name: string; status: string; date: string; publishman: string };
+  currentItem?: {
+    id: number;
+    name: string;
+    summary: string;
+    brochure: string;
+    badge: string;
+    avatar: string;
+    banner: string;
+    hero: string;
+    tags: string;
+    eduRanges: string;
+  };
 }
 
 export interface UniversityModelType {
@@ -20,6 +32,7 @@ export interface UniversityModelType {
     // login: Effect;
     // logout: Effect;
     setParams: Effect;
+    setCurrentItem: Effect;
   };
   reducers: {
     changeUniversityParams: Reducer<StateType>;
@@ -30,9 +43,17 @@ const Model: UniversityModelType = {
   namespace: 'university',
   state: {
     params: undefined,
+    currentItem: undefined,
   },
   effects: {
     *setParams({ payload }, { call, put }) {
+      console.log(payload, 'payload====');
+      yield put({
+        type: 'changeUniversityParams',
+        payload: payload,
+      });
+    },
+    *setCurrentItem({ payload }, { call, put }) {
       console.log(payload, 'payload====');
       yield put({
         type: 'changeUniversityParams',
@@ -89,6 +110,7 @@ const Model: UniversityModelType = {
         status: payload.status,
         type: payload.type,
         params: payload.params,
+        currentItem: payload.currentItem,
       };
     },
   },

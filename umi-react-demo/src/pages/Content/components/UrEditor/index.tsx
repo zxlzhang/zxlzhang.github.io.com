@@ -3,11 +3,14 @@ import { Editor } from '@tinymce/tinymce-react';
 
 interface UrEditorProps {
   handleEditorChange: Function;
+  content: String;
+  ref: String;
 }
 
 const actionImgUrl = 'https://wfplwim6-jiaji.mock.coding.io/api/admin/media/upload';
 
 const UrEditor = (UrEditorProps: any) => {
+  const { handleEditorChange, content } = UrEditorProps;
   const editorObj = {
     selector: '#tinydemo2',
     //skin:'oxide-dark',
@@ -42,8 +45,31 @@ const UrEditor = (UrEditorProps: any) => {
     //   { title: 'Some class', value: 'class-name' },
     // ],
     importcss_append: true,
-    images_upload_url: actionImgUrl,
-    images_upload_base_path: '/api',
+    // images_upload_url: actionImgUrl,
+    // images_upload_base_path: '/api',
+    images_upload_handler: function (blobInfo: any, succFun: any, failFun: any) {
+      var xhr: any, formData;
+      var file = blobInfo.blob(); //转化为易于理解的file对象
+      xhr = new XMLHttpRequest();
+      xhr.withCredentials = false;
+      xhr.open('POST', actionImgUrl);
+      xhr.onload = function () {
+        var json;
+        if (xhr.status != 200) {
+          failFun('HTTP Error: ' + xhr.status);
+          return;
+        }
+        json = JSON.parse(xhr.responseText);
+        if (!json || typeof json.location != 'string') {
+          failFun('Invalid JSON: ' + xhr.responseText);
+          return;
+        }
+        succFun(json.location);
+      };
+      formData = new FormData();
+      formData.append('file', file, file.name); //此处与源文档不一样
+      xhr.send(formData);
+    },
     // 自定义文件选择器的回调内容
     file_picker_callback: function (callback: any, value: any, meta: any) {
       if (meta.filetype === 'file') {
@@ -59,17 +85,18 @@ const UrEditor = (UrEditorProps: any) => {
         });
       }
     },
+
     autosave_ask_before_unload: false,
   };
 
   console.log(this);
 
-  const { handleEditorChange } = UrEditorProps;
-
   return (
     <Editor
       inline={false}
       //   selector="editorStateRef" // 选择器
+      // ref={ref}
+      initialValue={content}
       apiKey="官网上申请的key值"
       //   initialValue={editorState}
       init={{ ...editorObj }}

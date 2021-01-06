@@ -1,4 +1,4 @@
-import React, { Component, Suspense, useRef, useCallback, useState } from 'react';
+import React, { Component, Suspense, useRef, useCallback, useState, useEffect } from 'react';
 import { message, Form, Select, Row, Col, Button, Upload } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import UrEditor from '../../components/UrEditor';
@@ -20,8 +20,11 @@ import ProForm, {
   ProFormFieldSet,
 } from '@ant-design/pro-form';
 import debounce from 'lodash.debounce';
+import { Admin } from '@/services';
+import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
+import { StateType } from '@/models/news';
+import { ConnectState } from '@/models/connect';
 import styles from './index.less';
-import { Public, Admin } from '@/services';
 
 const waitTime = (time: number = 100) => {
   return new Promise((resolve) => {
@@ -34,111 +37,79 @@ const layout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 18 },
 };
-const PublishAticles = () => {
-  const [schoolOptions, setSchools] = useState([]);
-  const [avatarImageUrl, setavatarImageUrl] = useState('');
-  const [avatarImageLoading, setavatarImageLoading] = useState(false);
-  const [bannerImageUrl, setbannerImageUrl] = useState('');
-  const [bannerImageLoading, setbannerImageLoading] = useState(false);
-  const [heroImageUrl, setheroImageUrl] = useState('');
-  const [heroImageLoading, setheroImageLoading] = useState(false);
 
-  const onSearchName = useCallback(
+interface NewsModelProps {
+  dispatch: Dispatch;
+  newsProps: StateType;
+  // submitting?: boolean;
+}
+const PublishAticles: React.FC<NewsModelProps> = (props) => {
+  const [form] = Form.useForm();
+  const [stateContent, setContent] = useState(false);
+  const { newsProps = {} } = props;
+  const { currentItem } = newsProps;
+
+  useEffect(() => {
+    if (!currentItem == false) {
+      initObj(currentItem);
+      console.log(currentItem, 'currentItem===');
+    }
+  }, [currentItem]);
+
+  const initObj = (currentItem: any) => {
+    setContent(currentItem.content);
+    form.setFieldsValue({
+      title: currentItem.title,
+      content: currentItem.content,
+      eduRanges:
+        currentItem.eduRanges && currentItem.eduRanges.length > 0
+          ? currentItem.eduRanges.split(',')
+          : [] || [],
+      tags: currentItem.tags.split(','),
+    });
+  };
+
+  const handleEditorChange = useCallback(
     debounce((e: any) => {
-      initShools(e);
+      form.setFieldsValue({
+        content: e,
+      });
+      console.log(e, '编辑富文本====');
     }, 800),
     [],
   );
-
-  const initShools = (e: any) => {
-    const obj = {
-      name: e || undefined,
-    };
-    Admin.querySchools(obj)
-      .then((res) => {
-        if (!res.error) {
-          setSchools(
-            res.data.rows.map((el: any) => {
-              return { ...el, label: el.name, value: el.id };
-            }),
-          );
-        }
-      })
-      .catch(() => {});
-  };
-
-  const handleEditorChange = (e: any) => {
-    console.log(e, '编辑富文本====');
-  };
   const { Option } = Select;
-  const uploadAvatarButton = (
-    <div>
-      {avatarImageLoading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </div>
-  );
-
-  const uploadBannerButton = (
-    <div>
-      {bannerImageLoading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </div>
-  );
-
-  const uploadHeroButton = (
-    <div>
-      {heroImageLoading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </div>
-  );
-
-  const beforeUploadAvatar = (file: any) => {
-    // console.log(file, 'file===');
-    return file;
-  };
-  const beforeUploadBanner = (file: any) => {
-    console.log(file, 'file===');
-    return file;
-  };
-  const beforeUploadHero = (file: any) => {
-    console.log(file, 'file===');
-    return file;
-  };
-
-  const handleChangeAvatar = (file: any) => {
-    console.log(file.file, 'file===handleChangeAvatar===');
-    Admin.uploadMedia({ file: file.file }).then((res) => {
-      console.log(res, 'res===');
-    });
-  };
-  const handleChangeBanner = (file: any) => {
-    console.log(file, 'file===');
-  };
-  const handleChangeHero = (file: any) => {
-    console.log(file, 'file===');
-  };
 
   const onsubmit = (values: any) => {
-    console.log(values, 'values====onSubmit====');
     const obj = {
       title: values.title || undefined,
       content: values.content || undefined,
-      avatar: values.avatar || undefined,
-      banner: values.banner || undefined,
-      hero: values.hero || undefined,
+      eduRanges: values.eduRanges.length > 0 ? values.eduRanges.join(',') : undefined,
       tags: (values.tags && values.tags.join(',')) || undefined,
     };
-    Admin.addAticle(obj).then((res) => {
-      if (!res.error) {
-        message.success('操作成功');
-        history.back();
-      }
-    });
+    if (!currentItem) {
+      //新增
+      Admin.addAticle(obj).then((res) => {
+        if (!res.error) {
+          message.success('操作成功');
+          history.back();
+        }
+      });
+    } else {
+      //编辑
+      Admin.updateAticle(currentItem.id, obj).then((res) => {
+        if (!res.error) {
+          message.success('操作成功');
+          history.back();
+        }
+      });
+    }
   };
 
   return (
-    <div className={styles.urUniversityForm}>
+    <div className={styles.urNewsForm}>
       <ProForm
+        form={form}
         name="validate_other"
         onValuesChange={(_, values) => {
           console.log(values);
@@ -150,130 +121,28 @@ const PublishAticles = () => {
           },
         }}
       >
-        {/* <ProFormSelect
-          showSearch
-          name="select"
-          label="院校"
-          fieldProps={{
-            onSearch: onSearchName,
-            options: schoolOptions,
-          }}
-          // valueEnum={{
-          //   china: 'China',
-          //   usa: 'U.S.A',
-          // }}
-          placeholder="请输入院校"
-          rules={[{ required: true, message: '请输入院校' }]}
-        ></ProFormSelect> */}
         <ProFormText
           name="title"
           label="新闻标题"
           rules={[{ required: true, message: '请输入新闻标题' }]}
           placeholder="请输入新闻标题"
         />
-        {/* <ProFormCheckbox.Group
-          name="checkbox-group"
-          label="院校类型"
-          options={['211/985', '双一流']}
-          rules={[{ required: true, message: '请选择院校类型' }]}
-        /> */}
-        {/* <Form.Item
-          label="方块展示图"
-          name="avatar"
-          rules={[{ required: true, message: '请上传方块展示图' }]}
-        >
-          <Upload
-            name="avatar"
-            listType="picture-card"
-            className="avatar-uploader"
-            showUploadList={false}
-            // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            beforeUpload={beforeUploadAvatar}
-            onChange={handleChangeAvatar}
-          >
-            {avatarImageUrl ? (
-              <img src={avatarImageUrl} alt="avatar" style={{ width: '100%' }} />
-            ) : (
-              uploadAvatarButton
-            )}
-          </Upload>
-          <span style={{ color: '#d9d9d9' }}>移动端院校详情页Banner图，推荐规格375*225</span>
-        </Form.Item>
-        <Form.Item
-          label="横幅展示图"
-          name="banner"
-          rules={[{ required: true, message: '请上传横幅展示图' }]}
-        >
-          <Upload
-            name="banner"
-            listType="picture-card"
-            className="avatar-uploader"
-            showUploadList={false}
-            // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            beforeUpload={beforeUploadBanner}
-            onChange={handleChangeBanner}
-          >
-            {bannerImageUrl ? (
-              <img src={bannerImageUrl} alt="avatar" style={{ width: '100%' }} />
-            ) : (
-              uploadBannerButton
-            )}
-          </Upload>
-          <span style={{ color: '#d9d9d9' }}>PC端院校详情页Banner图，推荐规格1440*290</span>
-        </Form.Item>
-        <Form.Item
-          label="首页展示大图"
-          name="hero"
-          rules={[{ required: true, message: '请上传首页展示大图' }]}
-        >
-          <Upload
-            name="hero"
-            listType="picture-card"
-            className="avatar-uploader"
-            showUploadList={false}
-            // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-            beforeUpload={beforeUploadHero}
-            onChange={handleChangeHero}
-          >
-            {heroImageUrl ? (
-              <img src={heroImageUrl} alt="avatar" style={{ width: '100%' }} />
-            ) : (
-              uploadHeroButton
-            )}
-          </Upload>
-        </Form.Item> */}
-        {/* <ProFormUploadButton
-          name="upload"
-          label="移动端Banner"
-          max={2}
-          action="/upload.do"
-          extra="移动端院校详情页Banner图，推荐规格375*225"
-          rules={[{ required: true, message: '请上传移动端Banner' }]}
-        /> */}
-        {/* <ProFormUploadButton
-          name="upload"
-          label="PC端Banner"
-          max={2}
-          action="/upload.do"
-          extra="PC端院校详情页Banner图，推荐规格1440*290"
-          rules={[{ required: true, message: '请上传PC端Banner' }]}
-        /> */}
         <ProFormCheckbox.Group
-          name="checkbox-group"
+          name="eduRanges"
           label="文章范围"
-          rules={[{ required: true, message: '请选择学历范围' }]}
+          rules={[{ required: false, message: '请选择学历范围' }]}
           options={[
             {
               label: '学信网',
-              value: 'a',
+              value: '学信网',
             },
             {
               label: '在职研究生',
-              value: 'b',
+              value: '在职研究生',
             },
             {
               label: '定向招生',
-              value: 'c',
+              value: '定向招生',
             },
           ]}
         />
@@ -305,9 +174,9 @@ const PublishAticles = () => {
         <Form.Item
           name="content"
           label="文章内容"
-          rules={[{ required: false, message: '请输入文章内容' }]}
+          rules={[{ required: true, message: '请输入文章内容' }]}
         >
-          <UrEditor handleEditorChange={handleEditorChange}></UrEditor>
+          <UrEditor content={stateContent} handleEditorChange={handleEditorChange}></UrEditor>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" style={{ marginRight: '10px' }}>
@@ -328,4 +197,6 @@ const PublishAticles = () => {
   );
 };
 
-export default PublishAticles;
+export default connect(({ news, loading }: ConnectState) => ({
+  newsProps: news,
+}))(PublishAticles);

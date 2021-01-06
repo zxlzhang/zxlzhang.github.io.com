@@ -207,6 +207,12 @@ const News: React.FC<NewsModelProps> = (props) => {
     [],
   );
   const onEditor = (record: any) => {
+    const { dispatch } = props;
+    dispatch({
+      type: 'news/setCurrentItem',
+      payload: { currentItem: { ...record } },
+    });
+    history.push('/content/news/publish');
     console.log('编辑', record);
   };
   //批量上线
@@ -272,7 +278,16 @@ const News: React.FC<NewsModelProps> = (props) => {
     setOffset((current - 1) * 0);
   };
 
+  const onCreate = () => {
+    const { dispatch } = props;
+    dispatch({
+      type: 'news/setCurrentItem',
+      payload: { currentItem: undefined },
+    });
+  };
+
   const actionRef = useRef<ActionType>();
+
   return (
     <PageContainer>
       <Row>
@@ -286,7 +301,7 @@ const News: React.FC<NewsModelProps> = (props) => {
           <Button type="primary" onClick={onMutipleDel} disabled={selectedKeys.length == 0}>
             批量删除
           </Button>
-          <Button type="primary">
+          <Button type="primary" onClick={onCreate}>
             <Link to="/content/news/publish"> 发布文章</Link>
           </Button>
         </Col>

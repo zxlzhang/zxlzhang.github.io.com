@@ -15,7 +15,7 @@ async function updateAticle(id: number | string, params: any) {
     method: 'POST',
     data: {
       ...params,
-      method: 'post',
+      // method: 'post',
     },
   });
 }
@@ -70,7 +70,7 @@ async function addSchool(params: any) {
     method: 'POST',
     data: {
       ...params,
-      method: 'post',
+      // method: 'post',
     },
   });
 }
@@ -80,7 +80,7 @@ async function updateSchool(id: number | string, params: any) {
     method: 'POST',
     data: {
       ...params,
-      method: 'post',
+      // method: 'post',
     },
   });
 }

@@ -1,4 +1,4 @@
-import React, { Component, Suspense, useRef, useCallback, useState } from 'react';
+import React, { Component, Suspense, useRef, useCallback, useState, useEffect } from 'react';
 import { message, Form, Select, Row, Col, Button, Upload } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import UrEditor from '../../components/UrEditor';
@@ -20,10 +20,13 @@ import ProForm, {
   ProFormFieldSet,
 } from '@ant-design/pro-form';
 import debounce from 'lodash.debounce';
-import styles from './index.less';
-import { Public, Admin } from '@/services';
+import { Admin } from '@/services';
 import axios from 'axios';
 import config from '../../../../config';
+import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
+import { StateType } from '@/models/university';
+import { ConnectState } from '@/models/connect';
+import styles from './index.less';
 const waitTime = (time: number = 100) => {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -35,7 +38,12 @@ const layout = {
   labelCol: { span: 6 },
   wrapperCol: { span: 18 },
 };
-const PublistUniversity = () => {
+interface universityProps {
+  dispatch: Dispatch;
+  universityProps: StateType;
+  // submitting?: boolean;
+}
+const PublistUniversity: React.FC<universityProps> = (props) => {
   const [form] = Form.useForm();
   const [schoolOptions, setSchools] = useState([]);
   const [avatarImageUrl, setavatarImageUrl] = useState('');
@@ -44,6 +52,38 @@ const PublistUniversity = () => {
   const [bannerImageLoading, setbannerImageLoading] = useState(false);
   const [heroImageUrl, setheroImageUrl] = useState('');
   const [heroImageLoading, setheroImageLoading] = useState(false);
+  const [summaryContent, setSummary] = useState('');
+  const [brochureContent, setBrochure] = useState('');
+
+  const { universityProps = {} } = props;
+  const { currentItem } = universityProps;
+  useEffect(() => {
+    if (!currentItem == false) {
+      initObj(currentItem);
+      console.log(currentItem, 'currentItem===');
+    }
+  }, [currentItem]);
+
+  const initObj = (currentItem: any) => {
+    setavatarImageUrl(currentItem.avatar);
+    setbannerImageUrl(currentItem.banner);
+    setheroImageUrl(currentItem.hero);
+    setSummary(currentItem.summary);
+    setBrochure(currentItem.brochure);
+    form.setFieldsValue({
+      name: currentItem.name,
+      summary: currentItem.summary,
+      brochure: currentItem.brochure,
+      avatar: currentItem.avatar,
+      banner: currentItem.banner,
+      hero: currentItem.hero,
+      eduRanges:
+        currentItem.eduRanges && currentItem.eduRanges.length > 0
+          ? currentItem.eduRanges.split(',')
+          : [] || [],
+      tags: currentItem.tags.split(','),
+    });
+  };
 
   const onSearchName = useCallback(
     debounce((e: any) => {
@@ -68,10 +108,21 @@ const PublistUniversity = () => {
       })
       .catch(() => {});
   };
+  const handleEditorSummary = useCallback(
+    debounce((e: any) => {
+      console.log(e, '编辑富文本====');
+      form.setFieldsValue({ summary: e });
+    }, 800),
+    [],
+  );
 
-  const handleEditorChange = (e: any) => {
-    console.log(e, '编辑富文本====');
-  };
+  const handleEditorBrochure = useCallback(
+    debounce((e: any) => {
+      console.log(e, '编辑富文本====');
+      form.setFieldsValue({ brochure: e });
+    }, 800),
+    [],
+  );
   const { Option } = Select;
   const uploadAvatarButton = (
     <div>
@@ -130,10 +181,9 @@ const PublistUniversity = () => {
       .then((response) => {
         setavatarImageLoading(false);
         const { data } = response;
-        console.log(response, 'response====');
         if (data.data) {
           setavatarImageUrl(`${data.data[0].id}${data.data[0].ext}`);
-          form.setFieldsValue({ avatar: avatarImageUrl });
+          form.setFieldsValue({ avatar: `${data.data[0].id}${data.data[0].ext}` });
           // find();
         }
       })
@@ -166,7 +216,7 @@ const PublistUniversity = () => {
         console.log(response, 'response====');
         if (data.data) {
           setbannerImageUrl(`${data.data[0].id}${data.data[0].ext}`);
-          form.setFieldsValue({ banner: bannerImageUrl });
+          form.setFieldsValue({ banner: `${data.data[0].id}${data.data[0].ext}` });
           // find();
         }
       })
@@ -200,7 +250,7 @@ const PublistUniversity = () => {
         console.log(response, 'response====');
         if (data.data) {
           setheroImageUrl(`${data.data[0].id}${data.data[0].ext}`);
-          form.setFieldsValue({ hero: heroImageUrl });
+          form.setFieldsValue({ hero: `${data.data[0].id}${data.data[0].ext}` });
           // find();
         }
       })
@@ -210,10 +260,34 @@ const PublistUniversity = () => {
   };
 
   const onFinsh = (values: any) => {
-    console.log(values, 'values=====');
-    return;
+    const obj = {
+      name: values.name,
+      summary: values.summary,
+      brochure: values.brochure,
+      avatar: values.avatar,
+      banner: values.banner,
+      hero: values.hero,
+      eduRanges: values.eduRanges.length > 0 ? values.eduRanges.join(',') : undefined,
+      tags: values.tags.join(','),
+    };
+    //新增
+    if (!currentItem) {
+      Admin.addSchool(obj).then((res) => {
+        console.log(res, 'res=====');
+        if (!res.error) {
+          history.back();
+        }
+      });
+    } else {
+      //更新
+      Admin.updateSchool(currentItem.id, obj).then((res) => {
+        if (!res.error) {
+          history.back();
+        }
+      });
+    }
+    // return;
   };
-
   return (
     <div className={styles.urUniversityForm}>
       <ProForm
@@ -300,56 +374,22 @@ const PublistUniversity = () => {
             )}
           </Upload>
         </Form.Item>
-        {/* <ProFormUploadButton
-          name="avatar"
-          listType="picture"
-          label="方块展示图"
-          max={1}
-          // icon={<PlusOutlined />}
-          // title={<span></span>}
-          action={actionImgUrl}
-          // extra="移动端院校详情页Banner图，推荐规格375*225"
-          rules={[{ required: true, message: '请上传方块展示图' }]}
-        />
-
-        <ProFormUploadButton
-          name="banner"
-          listType="picture"
-          label="横幅展示图"
-          max={1}
-          // icon={<PlusOutlined />}
-          // title={<span></span>}
-          action={actionImgUrl}
-          // extra="移动端院校详情页Banner图，推荐规格375*225"
-          rules={[{ required: true, message: '请上传横幅展示图' }]}
-        />
-        <ProFormUploadButton
-          name="hero"
-          listType="picture"
-          label="首页展示大图"
-          max={1}
-          // icon={<PlusOutlined />}
-          // title={<span></span>}
-          action={actionImgUrl}
-          // extra="PC端院校详情页Banner图，推荐规格1440*290"
-          rules={[{ required: true, message: '请上传首页展示大图' }]}
-        /> */}
         <ProFormCheckbox.Group
-          name="checkbox-group"
+          name="eduRanges"
           label="学历范围"
-          rules={[{ required: true, message: '请选择学历范围' }]}
+          rules={[{ required: false, message: '请选择学历范围' }]}
           options={[
             {
               label: '学信网',
-              value: 'a',
+              value: '学信网',
             },
             {
               label: '在职研究生',
-              value: 'b',
+              value: '在职研究生',
             },
             {
               label: '定向招生',
-              value: 'c',
+              value: '定向招生',
             },
           ]}
         />
@@ -383,14 +423,22 @@ const PublistUniversity = () => {
           label="学院简介"
           rules={[{ required: true, message: '请输入学院简介' }]}
         >
-          <UrEditor handleEditorChange={handleEditorChange}></UrEditor>
+          <UrEditor
+            key={'summary'}
+            content={summaryContent}
+            handleEditorChange={handleEditorSummary}
+          ></UrEditor>
         </Form.Item>
         <Form.Item
           name="brochure"
           label="招生简章"
           rules={[{ required: true, message: '请输入招生简章' }]}
         >
-          <UrEditor handleEditorChange={handleEditorChange}></UrEditor>
+          <UrEditor
+            key={'brochure'}
+            content={brochureContent}
+            handleEditorChange={handleEditorBrochure}
+          ></UrEditor>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" style={{ marginRight: '10px' }}>
@@ -411,4 +459,6 @@ const PublistUniversity = () => {
   );
 };
 
-export default PublistUniversity;
+export default connect(({ university, loading }: ConnectState) => ({
+  universityProps: university,
+}))(PublistUniversity);

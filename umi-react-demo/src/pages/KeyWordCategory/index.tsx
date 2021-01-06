@@ -1,19 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import { Card, Row, Col, Form, Button, Input, Table, Avatar, InputNumber } from 'antd';
 import { useIntl, FormattedMessage, Dispatch, connect } from 'umi';
-import { Public, Admin } from '@/services';
-// import styles from './Welcome.less';
-// import styles from './Content.less';
-
-// const CodePreview: React.FC<{}> = ({ children }) => (
-//   <pre className={styles.pre}>
-//     <code>
-//       <Typography.Text copyable>{children}</Typography.Text>
-//     </code>
-//   </pre>
-// );
-
+import { Admin } from '@/services';
+import debounce from 'lodash.debounce';
 import { StateType } from '@/models/keywords';
 import { ConnectState } from '@/models/connect';
 
@@ -26,13 +16,13 @@ interface keyWordCategoryProps {
 const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
   const { keywordsProps = {} } = props;
   const { params } = keywordsProps;
-  const [selectionType, setSelectionType] = useState('checkbox');
   const [limit, setPagesize] = useState(10);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [dataSource, setDataSource] = useState<Array<{}>>([]);
+  const [dataSource, setDataSource] = useState<Array<{ id: number }>>([]);
   const [selectedKeys, setRowKeys] = useState([]);
+  const [replaceWord, setReplaceWord] = useState('');
   const intl = useIntl();
 
   useEffect(() => {
@@ -43,9 +33,9 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
     const obj = {
       limit,
       offset,
-      keyword: (params && params.keyword) || undefined,
-      startNum: (params && params.startNum) || undefined,
-      endNum: (params && params.endNum) || undefined,
+      name: (params && params.keyword) || undefined,
+      startNameLength: (params && params.startNum) || undefined,
+      endNameLength: (params && params.endNum) || undefined,
       // startTime: (params && params.date && params.date[0]) || undefined,
       // endTime: (params && params.date && params.date[1]) || undefined,
     };
@@ -110,16 +100,27 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
       payload: { params: values },
     });
   };
+  //变化可迁移的关键词
+  const changeWord = useCallback(
+    debounce((e: any) => {
+      setReplaceWord(e.target.value);
+    }, 800),
+    [],
+  );
+  //删除迁移关键词
+  const onReplace = () => {};
 
   // rowSelection object indicates the need for row selection
   const rowSelection = {
     onChange: (selectedRowKeys: any, selectedRows: any) => {
       console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      setRowKeys(selectedRowKeys);
     },
     getCheckboxProps: (record: any) => ({
       // disabled: record.name === 'Disabled User', // Column configuration not to be checked
       name: record.name,
     }),
+    selectedRowKeys: selectedKeys,
   };
   const [form] = Form.useForm();
 
@@ -178,24 +179,31 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
         </Form>
         <Row>
           <Col span={8}>
-            <Input placeholder="请输入关键词" />
+            <Input placeholder="请输入关键词" onChange={changeWord} />
             <span style={{ color: 'rgba(0,0,0,0.45)', fontSize: '12px' }}>
               该关键词删除后，文章将迁移到新的关键词
             </span>
           </Col>
           <Col span={8} offset={1}>
-            <Button type="primary">删除关键词</Button>
+            <Button
+              type="primary"
+              disabled={selectedKeys.length > 0 && !replaceWord == false ? false : true}
+              onClick={onReplace}
+            >
+              删除并迁移关键词
+            </Button>
           </Col>
         </Row>
       </Card>
       <Card style={{ marginTop: '24px' }}>
         <Table
+          rowKey={(record) => record.id}
           rowSelection={{
-            type: selectionType,
+            // type: selectionType,
             ...rowSelection,
           }}
           columns={columns}
-          dataSource={data}
+          dataSource={dataSource}
         />
       </Card>
     </PageContainer>
