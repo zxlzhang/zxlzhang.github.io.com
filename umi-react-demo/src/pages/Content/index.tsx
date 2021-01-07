@@ -172,7 +172,7 @@ class Analysis extends Component<AnalysisProps, AnalysisState> {
           <Button type="primary">
             <Link to="/content/university">院校</Link>
           </Button>
-          <Button type="primary">
+          <Button type="primary" disabled>
             <Link to="/content/service">服务</Link>
           </Button>
           <Button type="primary">

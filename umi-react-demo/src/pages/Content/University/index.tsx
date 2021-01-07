@@ -206,12 +206,13 @@ const University: React.FC<universityProps> = (props) => {
     [],
   );
   const onEditor = (record: any) => {
-    const { dispatch } = props;
-    dispatch({
-      type: 'university/setCurrentItem',
-      payload: { currentItem: { ...record } },
-    });
+    // const { dispatch } = props;
+    // dispatch({
+    //   type: 'university/setCurrentItem',
+    //   payload: { currentItem: { ...record } },
+    // });
     history.push('/content/university/publish');
+    window.sessionStorage.setItem('universityCurrentItem', JSON.stringify(record));
     console.log('编辑', record);
   };
   //批量上线
@@ -283,6 +284,7 @@ const University: React.FC<universityProps> = (props) => {
       type: 'university/setCurrentItem',
       payload: { currentItem: undefined },
     });
+    window.sessionStorage.setItem('universityCurrentItem', 'undefined');
   };
 
   const actionRef = useRef<ActionType>();

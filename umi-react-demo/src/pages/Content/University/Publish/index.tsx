@@ -55,11 +55,13 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
   const [summaryContent, setSummary] = useState('');
   const [brochureContent, setBrochure] = useState('');
 
-  const { universityProps = {} } = props;
-  const { currentItem } = universityProps;
+  // const { universityProps = {} } = props;
+  // const { currentItem } = universityProps;
+  const currentItem: any = window.sessionStorage.getItem('universityCurrentItem');
+  // console.log(JSON.parse(universityCurrentItem), 'JSON.----------universityCurrentItem====');
   useEffect(() => {
-    if (!currentItem == false) {
-      initObj(currentItem);
+    if (currentItem !== 'undefined') {
+      initObj(JSON.parse(currentItem));
       console.log(currentItem, 'currentItem===');
     }
   }, [currentItem]);
@@ -271,18 +273,18 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
       tags: values.tags.join(','),
     };
     //新增
-    if (!currentItem) {
+    if (currentItem == 'undefined') {
       Admin.addSchool(obj).then((res) => {
         console.log(res, 'res=====');
         if (!res.error) {
-          history.back();
+          history.goBack();
         }
       });
     } else {
       //更新
-      Admin.updateSchool(currentItem.id, obj).then((res) => {
+      Admin.updateSchool(JSON.parse(currentItem).id, obj).then((res) => {
         if (!res.error) {
-          history.back();
+          history.goBack();
         }
       });
     }
@@ -424,7 +426,7 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
           rules={[{ required: true, message: '请输入学院简介' }]}
         >
           <UrEditor
-            key={'summary'}
+            id={'summary'}
             content={summaryContent}
             handleEditorChange={handleEditorSummary}
           ></UrEditor>
@@ -435,7 +437,7 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
           rules={[{ required: true, message: '请输入招生简章' }]}
         >
           <UrEditor
-            key={'brochure'}
+            id={'brochure'}
             content={brochureContent}
             handleEditorChange={handleEditorBrochure}
           ></UrEditor>
@@ -448,7 +450,7 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
           <Button
             htmlType="reset"
             onClick={() => {
-              history.back();
+              history.goBack();
             }}
           >
             返回

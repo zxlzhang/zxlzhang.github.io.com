@@ -47,11 +47,12 @@ const PublishAticles: React.FC<NewsModelProps> = (props) => {
   const [form] = Form.useForm();
   const [stateContent, setContent] = useState(false);
   const { newsProps = {} } = props;
-  const { currentItem } = newsProps;
+  // const { currentItem } = newsProps;
+  const currentItem: any = window.sessionStorage.getItem('newsCurrentItem');
 
   useEffect(() => {
-    if (!currentItem == false) {
-      initObj(currentItem);
+    if (currentItem !== 'undefined') {
+      initObj(JSON.parse(currentItem));
       console.log(currentItem, 'currentItem===');
     }
   }, [currentItem]);
@@ -87,20 +88,20 @@ const PublishAticles: React.FC<NewsModelProps> = (props) => {
       eduRanges: values.eduRanges.length > 0 ? values.eduRanges.join(',') : undefined,
       tags: (values.tags && values.tags.join(',')) || undefined,
     };
-    if (!currentItem) {
+    if (currentItem == 'undefined') {
       //新增
       Admin.addAticle(obj).then((res) => {
         if (!res.error) {
           message.success('操作成功');
-          history.back();
+          history.goBack();
         }
       });
     } else {
       //编辑
-      Admin.updateAticle(currentItem.id, obj).then((res) => {
+      Admin.updateAticle(JSON.parse(currentItem).id, obj).then((res) => {
         if (!res.error) {
           message.success('操作成功');
-          history.back();
+          history.goBack();
         }
       });
     }
@@ -186,7 +187,7 @@ const PublishAticles: React.FC<NewsModelProps> = (props) => {
           <Button
             htmlType="reset"
             onClick={() => {
-              history.back();
+              history.goBack();
             }}
           >
             返回

@@ -207,12 +207,13 @@ const News: React.FC<NewsModelProps> = (props) => {
     [],
   );
   const onEditor = (record: any) => {
-    const { dispatch } = props;
-    dispatch({
-      type: 'news/setCurrentItem',
-      payload: { currentItem: { ...record } },
-    });
+    // const { dispatch } = props;
+    // dispatch({
+    //   type: 'news/setCurrentItem',
+    //   payload: { currentItem: { ...record } },
+    // });
     history.push('/content/news/publish');
+    window.sessionStorage.setItem('newsCurrentItem', JSON.stringify(record));
     console.log('编辑', record);
   };
   //批量上线
@@ -279,11 +280,12 @@ const News: React.FC<NewsModelProps> = (props) => {
   };
 
   const onCreate = () => {
-    const { dispatch } = props;
-    dispatch({
-      type: 'news/setCurrentItem',
-      payload: { currentItem: undefined },
-    });
+    // const { dispatch } = props;
+    // dispatch({
+    //   type: 'news/setCurrentItem',
+    //   payload: { currentItem: undefined },
+    // });
+    window.sessionStorage.setItem('newsCurrentItem', 'undefined');
   };
 
   const actionRef = useRef<ActionType>();
