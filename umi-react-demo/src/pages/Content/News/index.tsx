@@ -75,7 +75,7 @@ const News: React.FC<NewsModelProps> = (props) => {
       dataIndex: 'title',
       // // valueType: 'select',
       //   hideInTable: true,,
-      initialValue: (params && params.title) || undefined,
+      // initialValue: (params && params.title) || undefined,
       title: '新闻资讯',
       // valueEnum: {},
       renderFormItem: (item, { defaultRender }) => {
@@ -99,13 +99,13 @@ const News: React.FC<NewsModelProps> = (props) => {
     {
       dataIndex: 'publishman',
       valueType: 'select',
-      initialValue: (params && params.publishman) || undefined,
+      // initialValue: (params && params.publishman) || undefined,
       title: '发布者',
     },
     {
       dataIndex: 'date',
       title: '日期',
-      initialValue: (params && params.date) || undefined,
+      // initialValue: (params && params.date) || undefined,
       valueType: 'date',
       render: (_, record) => (
         <Space>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</Space>
@@ -115,7 +115,7 @@ const News: React.FC<NewsModelProps> = (props) => {
       dataIndex: 'status',
       valueType: 'select',
       title: '发布状态',
-      initialValue: (params && params.status) || undefined,
+      // initialValue: (params && params.status) || undefined,
       valueEnum: {
         all: { text: '全部' },
         yes: { text: '已上线' },

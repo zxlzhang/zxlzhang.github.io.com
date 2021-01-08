@@ -160,7 +160,7 @@ const UrEditor = (UrEditorProps: any) => {
       //   selector="editorStateRef" // 选择器
       // ref={ref}
       key={id}
-      initialValue={content}
+      initialValue={content || ''}
       apiKey="官网上申请的key值"
       //   initialValue={editorState}
       init={{ ...editorObj }}

@@ -318,6 +318,7 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
         >
           <Upload
             // name="avatar"
+            fileList={[]}
             listType="picture-card"
             className="avatar-uploader"
             showUploadList={false}
@@ -342,6 +343,7 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
             // name="banner"
             listType="picture-card"
             className="avatar-uploader"
+            fileList={[]}
             showUploadList={false}
             // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
             beforeUpload={beforeUploadBanner}
@@ -364,6 +366,7 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
             // name="hero"
             listType="picture-card"
             className="avatar-uploader"
+            fileList={[]}
             showUploadList={false}
             // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
             beforeUpload={beforeUploadHero}

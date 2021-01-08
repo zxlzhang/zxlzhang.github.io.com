@@ -1,5 +1,5 @@
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Menu, Spin } from 'antd';
+import { Avatar, Menu, Spin, Space } from 'antd';
 import React from 'react';
 import { history, ConnectProps, connect } from 'umi';
 import { ConnectState } from '@/models/connect';
@@ -45,26 +45,27 @@ class AvatarDropdown extends React.Component<GlobalHeaderRightProps> {
       menu,
     } = this.props;
     const menuHeaderDropdown = (
-      <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
-        {menu && (
-          <Menu.Item key="center">
-            <UserOutlined />
-            个人中心
-          </Menu.Item>
-        )}
-        {menu && (
-          <Menu.Item key="settings">
-            <SettingOutlined />
-            个人设置
-          </Menu.Item>
-        )}
-        {menu && <Menu.Divider />}
+      <Space></Space>
+      // <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
+      //   {menu && (
+      //     <Menu.Item key="center">
+      //       <UserOutlined />
+      //       个人中心
+      //     </Menu.Item>
+      //   )}
+      //   {menu && (
+      //     <Menu.Item key="settings">
+      //       <SettingOutlined />
+      //       个人设置
+      //     </Menu.Item>
+      //   )}
+      //   {menu && <Menu.Divider />}
 
-        <Menu.Item key="logout">
-          <LogoutOutlined />
-          退出登录
-        </Menu.Item>
-      </Menu>
+      //   <Menu.Item key="logout">
+      //     <LogoutOutlined />
+      //     退出登录
+      //   </Menu.Item>
+      // </Menu>
     );
     return currentUser && currentUser.name ? (
       <HeaderDropdown overlay={menuHeaderDropdown}>

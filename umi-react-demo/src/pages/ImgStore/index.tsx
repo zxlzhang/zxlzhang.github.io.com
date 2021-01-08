@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
 import {
   Card,
@@ -12,7 +12,8 @@ import {
   Modal,
   Upload,
   Checkbox,
-  message,
+  Pagination,
+  Spin,
 } from 'antd';
 import { useIntl, FormattedMessage, connect, Dispatch, ConnectProps, history, Link } from 'umi';
 import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
@@ -33,30 +34,44 @@ interface imgtoreProps {
 const ImgStore: React.FC<imgtoreProps> = (props) => {
   const { imgStoreStateProps = {} } = props;
   const { params } = imgStoreStateProps;
-
   const [listFlag, setListFlag] = useState(false);
-  const [limit, setPagesize] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [pagesize, setPageSize] = useState(1);
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<Array<{ id: string; ext: string }>>([]);
   const [selectedKeys, setRowKeys] = useState<Array<string>>([]);
+  const [stateParams, setStateParams] = useState<any>({});
   const { RangePicker } = DatePicker;
   const intl = useIntl();
   const { confirm } = Modal;
+
+  // useReducer(() => {
+  //   const { dispatch } = props;
+  //   dispatch({
+  //     type: 'imgStore/setParams',
+  //     payload: { params: undefined },
+  //   });
+  // });
   useEffect(() => {
+    // setStateParams(params);
     find();
-  }, [limit, offset, params]);
+  }, [limit, offset, stateParams]);
   //获取列表
   const find = () => {
     const obj = {
       limit,
       offset,
       startDate:
-        (params && params.date && moment(params.date[0]).format('YYYY-MM-DD HH:mm:ss')) ||
+        (stateParams &&
+          stateParams.date &&
+          moment(stateParams.date[0]).format('YYYY-MM-DD HH:mm:ss')) ||
         undefined,
       endDate:
-        (params && params.date && moment(params.date[1]).format('YYYY-MM-DD HH:mm:ss')) ||
+        (stateParams &&
+          stateParams.date &&
+          moment(stateParams.date[1]).format('YYYY-MM-DD HH:mm:ss')) ||
         undefined,
     };
     setLoading(true);
@@ -76,6 +91,7 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
 
   const onFinish = (values: any) => {
     console.log(values, 'values=====');
+    setStateParams(values);
     const { dispatch } = props;
     dispatch({
       type: 'imgStore/setParams',
@@ -152,6 +168,17 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
     });
   };
   const [form] = Form.useForm();
+  const onChangePage = (page: any, pageSize: any) => {
+    setOffset(page - 1);
+    setPageSize(page);
+    setLimit(pageSize);
+  };
+
+  const onShowSizeChange = (current: any, pageSize: any) => {
+    console.log(current, pageSize);
+    setOffset(current);
+    setLimit(pageSize);
+  };
   return (
     <PageContainer>
       <Card>
@@ -203,52 +230,65 @@ const ImgStore: React.FC<imgtoreProps> = (props) => {
         </Col>
       </Row>
       <Card>
-        {!listFlag ? (
-          <List
-            itemLayout="horizontal"
-            dataSource={dataSource}
-            renderItem={(item: { id: string; ext: string }) => (
-              <List.Item
-                extra={
-                  <Checkbox
-                    checked={selectedKeys.findIndex((el) => el == item.id) != -1 ? true : false}
-                    onChange={(e) => {
+        <Spin spinning={loading}>
+          {!listFlag ? (
+            <List
+              itemLayout="horizontal"
+              dataSource={dataSource}
+              renderItem={(item: { id: string; ext: string }) => (
+                <List.Item
+                  extra={
+                    <Checkbox
+                      checked={selectedKeys.findIndex((el) => el == item.id) != -1 ? true : false}
+                      onChange={(e) => {
+                        onCheckRadio(e, item);
+                      }}
+                    ></Checkbox>
+                  }
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar src={`${item.id}${item.ext}`} />}
+                    title={`${item.id}${item.ext}`}
+                    // description="Ant Design, a design language for background applications, is refined by Ant UED Team"
+                  />
+                </List.Item>
+              )}
+            />
+          ) : (
+            <Row gutter={[16, 24]}>
+              {dataSource.map((item) => (
+                <Col className="gutter-row" span={4}>
+                  <div
+                    style={
+                      selectedKeys.findIndex((el) => el == item.id) != -1
+                        ? { border: '1px solid #059aff', padding: '3px' }
+                        : { border: '1px solid #d9d9d9', padding: '3px' }
+                    }
+                    onClick={(e) => {
                       onCheckRadio(e, item);
                     }}
-                  ></Checkbox>
-                }
-              >
-                <List.Item.Meta
-                  avatar={<Avatar src={`${item.id}${item.ext}`} />}
-                  title={`${item.id}${item.ext}`}
-                  // description="Ant Design, a design language for background applications, is refined by Ant UED Team"
-                />
-              </List.Item>
-            )}
-          />
-        ) : (
-          <Row gutter={[16, 24]}>
-            {dataSource.map((item) => (
-              <Col className="gutter-row" span={4}>
-                <div
-                  style={
-                    selectedKeys.findIndex((el) => el == item.id) != -1
-                      ? { border: '1px solid #059aff', padding: '3px' }
-                      : { border: '1px solid #d9d9d9', padding: '3px' }
-                  }
-                  onClick={(e) => {
-                    onCheckRadio(e, item);
-                  }}
-                >
-                  <img src={`${item.id}${item.ext}`} alt="avatar" style={{ width: '100%' }} />
-                  <Checkbox
-                    checked={selectedKeys.findIndex((el) => el == item.id) != -1 ? true : false}
-                  ></Checkbox>
-                </div>
-              </Col>
-            ))}
-          </Row>
-        )}
+                  >
+                    <img src={`${item.id}${item.ext}`} alt="avatar" style={{ width: '100%' }} />
+                    <Checkbox
+                      checked={selectedKeys.findIndex((el) => el == item.id) != -1 ? true : false}
+                    ></Checkbox>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Spin>
+        <Row>
+          <Col span={24} style={{ textAlign: 'right', paddingTop: '12px' }}>
+            <Pagination
+              showSizeChanger
+              onShowSizeChange={onShowSizeChange}
+              onChange={onChangePage}
+              current={pagesize}
+              total={total}
+            />
+          </Col>
+        </Row>
       </Card>
     </PageContainer>
   );

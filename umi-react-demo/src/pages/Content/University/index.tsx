@@ -27,7 +27,9 @@ interface GithubIssueItem {
   labels: {
     name: string;
     color: string;
+    span: number;
   }[];
+  span: number;
   state: string;
   comments: number;
   created_at: string;
@@ -59,52 +61,37 @@ const University: React.FC<universityProps> = (props) => {
   // const [universityList, setUniversity] = useState([]);
   const { universityProps = {} } = props;
   const { params, currentItem } = universityProps;
-
   const [limit, setPagesize] = useState(10);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [dataSource, setDataSource] = useState<Array<{}>>([]);
   const [selectedKeys, setRowKeys] = useState([]);
+  // const [columns, setColumns] = useState<Array<GithubIssueItem>>([]);
 
   const { confirm } = Modal;
-
+  useEffect(() => {
+    find();
+    // setColumns([])
+    console.log(params, 'params===useEffect');
+  }, [limit, offset, params]);
+  console.log(params, 'params====columns');
   const columns: ProColumns<GithubIssueItem>[] = [
     {
       dataIndex: 'name',
-      // // valueType: 'select',
-      //   hideInTable: true,,
-      initialValue: (params && params.name) || undefined,
+      // initialValue: (params && params.name) || undefined,
       title: '院校',
-      // valueEnum: {},
-      renderFormItem: (item, { defaultRender }) => {
-        return (
-          <Select
-            showSearch
-            placeholder={'请输入院校'}
-            // style={this.props.style}
-            defaultActiveFirstOption={false}
-            showArrow={false}
-            filterOption={false}
-            onSearch={handleChangeTitle}
-            // onChange={handleChangeTitle}
-            notFoundContent={null}
-          >
-            {/* {item} */}
-          </Select>
-        );
-      },
     },
     {
       dataIndex: 'publishman',
       valueType: 'select',
-      initialValue: (params && params.publishman) || undefined,
+      // initialValue: (params && params.publishman) || undefined,
       title: '发布者',
     },
     {
       dataIndex: 'date',
       title: '日期',
-      initialValue: (params && params.date) || undefined,
+      // initialValue: (params && params.date) || undefined,
       valueType: 'date',
       render: (_, record) => (
         <Space>{moment(record.createdAt).format('YYYY-MM-DD HH:mm:ss')}</Space>
@@ -114,7 +101,7 @@ const University: React.FC<universityProps> = (props) => {
       dataIndex: 'status',
       valueType: 'select',
       title: '发布状态',
-      initialValue: (params && params.status) || undefined,
+      // initialValue: (params && params.status) || undefined,
       valueEnum: {
         all: { text: '全部' },
         yes: { text: '已上线' },
@@ -148,9 +135,6 @@ const University: React.FC<universityProps> = (props) => {
     },
   ];
 
-  useEffect(() => {
-    find();
-  }, [limit, offset, params]);
   //获取列表
   const find = () => {
     const obj = {
@@ -264,6 +248,14 @@ const University: React.FC<universityProps> = (props) => {
       payload: { params: { ...e } },
     });
   };
+  // //重置表单
+  // const onReset = () => {
+  //   const { dispatch } = props;
+  //   dispatch({
+  //     type: 'university/setParams',
+  //     payload: { params: undefined },
+  //   });
+  // };
   //多选
   const onSelectedRowKeys = (rowKeys: any, rows: any) => {
     setRowKeys(rowKeys);
@@ -308,6 +300,9 @@ const University: React.FC<universityProps> = (props) => {
       </Row>
       <ProTable<GithubIssueItem>
         className={styles.urProTable}
+        // labelAlign="left"
+        // labelCol={{ span: 4 }}
+        // wrapperCol={{ span: 14 }}
         columns={columns}
         loading={loading}
         rowSelection={{
@@ -321,6 +316,7 @@ const University: React.FC<universityProps> = (props) => {
         }}
         actionRef={actionRef}
         onSubmit={onSubmit}
+        // onReset={onReset}
         dataSource={dataSource}
         // request={
         //   dataSource:dataSource,

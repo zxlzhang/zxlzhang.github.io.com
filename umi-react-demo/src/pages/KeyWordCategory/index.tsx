@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Card, Row, Col, Form, Button, Input, Table, Avatar, InputNumber } from 'antd';
+import { Card, Row, Col, Form, Button, Input, Table, Avatar, InputNumber, Pagination } from 'antd';
 import { useIntl, FormattedMessage, Dispatch, connect } from 'umi';
 import { Admin } from '@/services';
 import debounce from 'lodash.debounce';
@@ -16,26 +16,29 @@ interface keyWordCategoryProps {
 const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
   const { keywordsProps = {} } = props;
   const { params } = keywordsProps;
-  const [limit, setPagesize] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [pagesize, setPageSize] = useState(1);
   const [loading, setLoading] = useState(false);
+
   const [dataSource, setDataSource] = useState<Array<{ id: number }>>([]);
   const [selectedKeys, setRowKeys] = useState([]);
   const [replaceWord, setReplaceWord] = useState('');
+  const [stateParams, setStateParams] = useState<any>({});
   const intl = useIntl();
 
   useEffect(() => {
     find();
-  }, [limit, offset, params]);
+  }, [limit, offset, stateParams]);
   //获取列表
   const find = () => {
     const obj = {
       limit,
       offset,
-      name: (params && params.keyword) || undefined,
-      startNameLength: (params && params.startNum) || undefined,
-      endNameLength: (params && params.endNum) || undefined,
+      name: (stateParams && stateParams.keyword) || undefined,
+      startNameLength: (stateParams && stateParams.startNum) || undefined,
+      endNameLength: (stateParams && stateParams.endNum) || undefined,
       // startTime: (params && params.date && params.date[0]) || undefined,
       // endTime: (params && params.date && params.date[1]) || undefined,
     };
@@ -94,6 +97,7 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
 
   const onFinish = (values: any) => {
     console.log(values, 'values=====');
+    setStateParams(values);
     const { dispatch } = props;
     dispatch({
       type: 'keyword/setParams',
@@ -123,6 +127,17 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
     selectedRowKeys: selectedKeys,
   };
   const [form] = Form.useForm();
+  const onChangePage = (page: any, pageSize: any) => {
+    setOffset(page - 1);
+    setPageSize(page);
+    setLimit(pageSize);
+  };
+
+  const onShowSizeChange = (current: any, pageSize: any) => {
+    console.log(current, pageSize);
+    setOffset(current);
+    setLimit(pageSize);
+  };
 
   return (
     <PageContainer>
@@ -202,9 +217,22 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
             // type: selectionType,
             ...rowSelection,
           }}
+          loading={loading}
           columns={columns}
           dataSource={dataSource}
+          pagination={false}
         />
+        <Row>
+          <Col span={24} style={{ textAlign: 'right', paddingTop: '12px' }}>
+            <Pagination
+              showSizeChanger
+              onShowSizeChange={onShowSizeChange}
+              onChange={onChangePage}
+              current={pagesize}
+              total={total}
+            />
+          </Col>
+        </Row>
       </Card>
     </PageContainer>
   );
