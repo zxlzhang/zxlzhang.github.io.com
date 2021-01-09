@@ -1,5 +1,5 @@
 import React, { Component, Suspense, useRef, useCallback, useState, useEffect } from 'react';
-import { message, Form, Select, Row, Col, Button, Upload } from 'antd';
+import { message, Form, Select, Row, Col, Button, Upload, Card } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import UrEditor from '../../components/UrEditor';
 import ProForm, {
@@ -292,6 +292,12 @@ const PublistUniversity: React.FC<universityProps> = (props) => {
   };
   return (
     <div className={styles.urUniversityForm}>
+      <Card style={{ backgroundColor: '#f7f7f7', marginBottom: '24px' }}>
+        <Row>
+          <Col span={2}>示例链接:</Col>
+          <Col span={22}>http://www.jia.team/university/1123512.html</Col>
+        </Row>
+      </Card>
       <ProForm
         form={form}
         name="validate_other"
