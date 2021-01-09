@@ -199,7 +199,7 @@ const KeyWordCategory: React.FC<keyWordCategoryProps> = (props) => {
               该关键词删除后，文章将迁移到新的关键词
             </span>
           </Col>
-          <Col span={8} offset={1}>
+          <Col span={8} offset={1} style={{ paddingLeft: '20px' }}>
             <Button
               type="primary"
               disabled={selectedKeys.length > 0 && !replaceWord == false ? false : true}

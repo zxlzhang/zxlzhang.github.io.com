@@ -80,7 +80,7 @@ const University: React.FC<universityProps> = (props) => {
     {
       dataIndex: 'name',
       // initialValue: (params && params.name) || undefined,
-      title: '院校',
+      title: '院校名称',
     },
     {
       dataIndex: 'publishman',
